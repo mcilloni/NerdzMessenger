@@ -1,95 +1,94 @@
 <?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android" >
 
-<merge
-  xmlns:android="http://schemas.android.com/apk/res/android">
-    <LinearLayout 
+    <LinearLayout
+        android:id="@id/login_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
         android:gravity="center_horizontal"
-        android:layout_gravity="center" 
-        android:orientation="vertical" 
-        android:id="@id/login_status" 
-        android:visibility="gone" 
-        android:layout_width="wrap_content" 
-        android:layout_height="wrap_content">
-        
-        <ProgressBar 
+        android:orientation="vertical"
+        android:visibility="gone" >
+
+        <ProgressBar
+            style="?android:attr/progressBarStyleLarge"
             android:layout_width="wrap_content"
-             android:layout_height="wrap_content"
-              android:layout_marginBottom="8.0dip"
-               style="?android:attr/progressBarStyleLarge" />
-        <TextView 
-            android:textAppearance="?android:textAppearanceMedium"
-            android:id="@id/login_status_message" 
-            android:layout_width="wrap_content" 
-            android:layout_height="wrap_content" 
-            android:layout_marginBottom="16.0dip" 
-            android:text="@string/login_progress_signing_in" 
-            android:fontFamily="sans-serif-light" />
-        
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8.0dip" />
+
+        <TextView
+            android:id="@id/login_status_message"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16.0dip"
+            android:fontFamily="sans-serif-light"
+            android:text="@string/login_progress_signing_in"
+            android:textAppearance="?android:textAppearanceMedium" />
     </LinearLayout>
-    
-    <ScrollView 
-        android:id="@id/login_form" 
-        android:layout_width="fill_parent" 
-        android:layout_height="fill_parent">
-        
-        <LinearLayout 
-            android:orientation="vertical" 
-            android:focusable="true" 
-            android:focusableInTouchMode="true" 
-            style="@style/LoginFormContainer">
-            
-            <TextView 
-                android:textAppearance="?android:textAppearanceLarge" 
-                android:textStyle="bold" 
-                android:layout_gravity="center" 
-                android:id="@id/textView2" 
-                android:layout_width="wrap_content" 
-                android:layout_height="fill_parent" 
-                android:text="@string/login_welcome" />
-            
-            <android.support.v7.widget.Space 
-                android:layout_width="fill_parent" 
+
+    <ScrollView
+        android:id="@id/login_form"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" >
+
+        <LinearLayout
+            style="@style/LoginFormContainer"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@id/textView2"
+                android:layout_width="wrap_content"
+                android:layout_height="fill_parent"
+                android:layout_gravity="center"
+                android:text="@string/login_welcome"
+                android:textAppearance="?android:textAppearanceLarge"
+                android:textStyle="bold" />
+
+            <android.support.v7.widget.Space
+                android:layout_width="fill_parent"
                 android:layout_height="29.0dip" />
-            
-            <TextView 
-                android:textAppearance="?android:textAppearanceLarge" 
-                android:layout_gravity="center" 
-                android:id="@id/textView" 
-                android:layout_width="wrap_content" 
-                android:layout_height="83.0dip" 
-                android:text="@string/login_greeting" />
-            
-            <EditText 
-                android:id="@id/username" 
-                android:layout_width="fill_parent" 
-                android:layout_height="wrap_content" 
-                android:hint="@string/prompt_username" 
-                android:maxLines="1" 
-                android:singleLine="true" 
-                android:inputType="textNoSuggestions" />
-            
-            <EditText 
-                android:id="@id/password" 
-                android:layout_width="fill_parent" 
-                android:layout_height="wrap_content" 
-                android:hint="@string/prompt_password" 
-                android:maxLines="1" 
-                android:singleLine="true" 
-                android:inputType="textPassword" 
-                android:imeOptions="normal|actionUnspecified" 
-                android:imeActionLabel="@string/action_sign_in" 
-                android:imeActionId="@id/login" />
-            
-            <Button 
-                android:layout_gravity="right" 
-                android:id="@id/sign_in_button" 
-                android:paddingLeft="32.0dip" 
-                android:paddingRight="32.0dip" 
-                android:layout_width="wrap_content" 
-                android:layout_height="wrap_content" 
-                android:layout_marginTop="16.0dip" 
+
+            <TextView
+                android:id="@id/textView"
+                android:layout_width="wrap_content"
+                android:layout_height="83.0dip"
+                android:layout_gravity="center"
+                android:text="@string/login_greeting"
+                android:textAppearance="?android:textAppearanceLarge" />
+
+            <EditText
+                android:id="@id/username"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/prompt_username"
+                android:inputType="textNoSuggestions"
+                android:maxLines="1"
+                android:singleLine="true" />
+
+            <EditText
+                android:id="@id/password"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/prompt_password"
+                android:imeActionId="@id/login"
+                android:imeActionLabel="@string/action_sign_in"
+                android:imeOptions="normal|actionUnspecified"
+                android:inputType="textPassword"
+                android:maxLines="1"
+                android:singleLine="true" />
+
+            <Button
+                android:id="@id/sign_in_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right"
+                android:layout_marginTop="16.0dip"
+                android:paddingLeft="32.0dip"
+                android:paddingRight="32.0dip"
                 android:text="@string/action_sign_in" />
-            
         </LinearLayout>
     </ScrollView>
+
 </merge>

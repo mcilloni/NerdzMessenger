@@ -15,6 +15,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.Pair;
+import android.widget.TextView;
 
 public class ConversationsListActivity extends PopupActivity {
 
@@ -53,42 +54,51 @@ public class ConversationsListActivity extends PopupActivity {
         @Override
         protected Pair<List<Pair<Conversation, Message>>, Throwable> doInBackground(Void... params) {
 
+            Log.d(TAG, "doInBackground()");
+
             try {
                 List<Conversation> conversations = this.mMessaging.getConversations();
                 if (conversations == null)
                     return null;
                 List<Pair<Conversation, Message>> newList = new ArrayList<Pair<Conversation, Message>>(conversations.size());
-                Pair<List<Pair<Conversation, Message>>, Throwable> result = Pair.create(newList, null);
                 for (Conversation conversation : conversations) {
                     Message sample = this.mMessaging.getFirstMessage(conversation);
+                    newList.add(Pair.create(conversation, sample));
                 }
-
+                return Pair.create(newList, null);
             } catch (Throwable t) {
                 return Pair.create(null, t);
             }
 
-            // } catch (ContentException e) {
-            // ConversationsListActivity.this.shortToast("There's something weird in NERDZ Beta. Please, blame Robertof ASAP: "
-            // + e.getLocalizedMessage());
-            // ConversationsListActivity.this.finish();
-            // } catch (IOException e) {
-            // ConversationsListActivity.this.shortToast("Network error: " +
-            // e.getLocalizedMessage());
-            // ConversationsListActivity.this.finish();
-            // } catch (HttpException e) {
-            // ConversationsListActivity.this.shortToast("HTTP Error: " +
-            // e.getLocalizedMessage());
-            // }
-
-            // Pair<List<Pair<Conversation, String>>, Throwable> result =
-            // Pair<List<Pair<Conversation, String>>, Throwable>.create(new
-            // ArrayList<Pair<Conversation, String>>(20),null);
-
-            return null;
         }
 
         @Override
         protected void onPostExecute(Pair<List<Pair<Conversation, Message>>, Throwable> result) {
+
+            Log.d(TAG, "onPostExecute()");
+
+            Throwable t = result.second;
+
+            if (t != null) {
+                Log.d(TAG, "received a " + t.getClass().toString() + " throwable");
+
+                if (t instanceof ContentException)
+                    ConversationsListActivity.this.shortToast("There's something weird in NERDZ Beta. Please, blame Robertof ASAP: " + t.getLocalizedMessage());
+                else if (t instanceof IOException)
+                    ConversationsListActivity.this.shortToast("Network error: " + t.getLocalizedMessage());
+                else if (t instanceof HttpException)
+                    ConversationsListActivity.this.shortToast("HTTP Error: " + t.getLocalizedMessage());
+            }
+
+            List<Pair<Conversation, Message>> conversations = result.first;
+
+            if (conversations == null) {
+                
+                TextView textView = (TextView) ConversationsListActivity.this.findViewById(R.id.no_conversations_msg);
+                textView.setHeight(73);
+                textView.setText(ConversationsListActivity.this.getString(R.string.no_conversations));
+                
+            } else {}
 
         }
 
