@@ -31,7 +31,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".authenticator.LoginActivity"
+            android:name="eu.nerdz.app.authenticator.LoginActivity"
             android:label="@string/login_login"
             android:windowSoftInputMode="stateHidden|adjustPan" />
         <activity
@@ -40,7 +40,7 @@
         </activity>
 
         <service
-            android:name=".authenticator.NerdzAuthenticatorService"
+            android:name="eu.nerdz.app.authenticator.NerdzAuthenticatorService"
             android:exported="false"
             android:label="NerdzAuthenticatorService"
             android:process=":auth" >

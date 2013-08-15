@@ -41,6 +41,7 @@ public class LoginActivity extends PopupActivity {
     private String mUsername;
     private EditText mUsernameView;
 
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         Log.i(TAG, "onCreate(" + savedInstanceState + ")");

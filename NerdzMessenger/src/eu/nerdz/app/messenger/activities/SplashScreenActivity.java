@@ -7,6 +7,7 @@ import android.accounts.AccountManagerCallback;
 import android.accounts.AccountManagerFuture;
 import android.accounts.AuthenticatorException;
 import android.accounts.OperationCanceledException;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -25,6 +26,7 @@ public class SplashScreenActivity extends PopupActivity {
 
     private AccountManager mAM;
 
+    @Override
     public void onCreate(Bundle savedInstanceState) {
 
         Log.i(TAG, "onCreate(" + savedInstanceState + ")");
@@ -143,7 +145,8 @@ public class SplashScreenActivity extends PopupActivity {
                     }
 
                 } else {
-                    SplashScreenActivity.this.shortToast("Correctly initialized for account " + Messaging.get().getUserInfo().getUsername() + '.');
+                    Intent intent = new Intent(SplashScreenActivity.this, ConversationsListActivity.class);
+                    SplashScreenActivity.this.startActivity(intent);
                 }
             }
 

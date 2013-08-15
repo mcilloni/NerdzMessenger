@@ -66,13 +66,17 @@ public class Messaging {
 
     }
 
-    public List<Message> getMessagesFromConversation(Conversation conversation) throws ContentException, IOException, HttpException {
+    public Message getFirstMessage(Conversation conversation) throws ContentException, IOException, HttpException {
+        return this.getMessages(conversation, 0, 1).get(0);
+    }
+    
+    public List<Message> getMessages(Conversation conversation) throws ContentException, IOException, HttpException {
 
         return this.mMessenger.getConversationHandler().getMessagesFromConversation(conversation);
 
     }
 
-    public List<Message> getMessagesFromConversation(Conversation conversation, int start, int howMany) throws ContentException, IOException, HttpException {
+    public List<Message> getMessages(Conversation conversation, int start, int howMany) throws ContentException, IOException, HttpException {
 
         return this.mMessenger.getConversationHandler().getMessagesFromConversation(conversation, start, howMany);
 
