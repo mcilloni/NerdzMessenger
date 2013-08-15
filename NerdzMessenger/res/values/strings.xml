@@ -7,6 +7,7 @@
     <string name="action_sign_in">Sign in</string>
     <string name="app_name">Nerdz Messenger</string>
     <string name="authtoken_type">NerdzU</string>
+    <string name="conversation_list">Conversations</string>
     <string name="data_nerdzid">NerdzID</string>
     <string name="data_nerdzu">NerdzU</string>
     <string name="error_account_already_present">Only one NERDZ account is allowed</string>

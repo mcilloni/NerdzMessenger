@@ -30,10 +30,6 @@ import eu.nerdz.app.messenger.activities.PopupActivity;
 
 public class LoginActivity extends PopupActivity {
 
-    public static final String PARAM_AUTHTOKEN_TYPE = "nerdzU";
-    public static final String PARAM_CONFIRM_CREDENTIALS = "confirmCredentials";
-    public static final String PARAM_PASSWORD = "password";
-    public static final String PARAM_USERNAME = "username";
     private static final String TAG = "NdzLoginAct";
     private AccountManager mAccountManager;
     private UserLoginTask mAuthTask = null;
