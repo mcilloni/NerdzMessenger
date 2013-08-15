@@ -6,6 +6,7 @@ import android.accounts.AccountAuthenticatorResponse;
 import android.accounts.AccountManager;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -103,6 +104,7 @@ public class LoginActivity extends PopupActivity {
     /**
      * Shows the progress UI and hides the login form.
      */
+    @SuppressLint("Override")
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
     private void showProgress(final boolean show) {
 
@@ -115,7 +117,7 @@ public class LoginActivity extends PopupActivity {
             this.mLoginStatusView.setVisibility(View.VISIBLE);
             this.mLoginStatusView.animate().setDuration(shortAnimTime).alpha(show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
 
-                @Override
+                @SuppressLint("Override")
                 public void onAnimationEnd(Animator animation) {
 
                     LoginActivity.this.mLoginStatusView.setVisibility(show ? View.VISIBLE : View.GONE);
@@ -125,7 +127,7 @@ public class LoginActivity extends PopupActivity {
             this.mLoginFormView.setVisibility(View.VISIBLE);
             this.mLoginFormView.animate().setDuration(shortAnimTime).alpha(show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
 
-                @Override
+                @SuppressLint("Override")
                 public void onAnimationEnd(Animator animation) {
 
                     LoginActivity.this.mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
@@ -250,7 +252,7 @@ public class LoginActivity extends PopupActivity {
                         
                         Bundle result = new Bundle();
                         result.putString(AccountManager.KEY_ACCOUNT_NAME, userName);
-                        result.putString("accountType", LoginActivity.this.getString(2131165184));
+                        result.putString(AccountManager.KEY_ACCOUNT_TYPE, LoginActivity.this.getString(R.string.account_type));
                         result.putString(LoginActivity.this.getString(R.string.data_nerdzid), userID.toString());
                         result.putString(LoginActivity.this.getString(R.string.data_nerdzu), userInfo.getToken());
                         response.onResult(result);
