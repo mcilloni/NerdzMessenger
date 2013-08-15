@@ -1,0 +1,30 @@
+<?xml version='1.0' encoding='utf-8'?>
+
+<manifest android:versionCode="1" android:versionName="1.0" package="eu.nerdz.app.messenger"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+  
+    <uses-sdk android:minSdkVersion="7"
+              android:targetSdkVersion="18" />
+    
+    <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.MANAGE_ACCOUNTS" />
+    <uses-permission android:name="android.permission.USE_CREDENTIALS" />
+    
+    <application android:theme="@style/AppTheme" android:label="@string/app_name" android:icon="@drawable/ic_launcher" android:allowBackup="true">
+        <activity android:theme="@*android:style/Theme.NoTitleBar" android:name="eu.nerdz.app.messenger.activities.SplashScreenActivity" android:screenOrientation="portrait" android:noHistory="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:label="@string/login_login" android:name="eu.nerdz.app.authenticator.LoginActivity" android:windowSoftInputMode="stateHidden|adjustPan" />
+        <service android:label="NerdzAuthenticatorService" android:name="eu.nerdz.app.authenticator.NerdzAuthenticatorService" android:exported="false" android:process=":auth">
+            <intent-filter>
+                <action android:name="android.accounts.AccountAuthenticator" />
+            </intent-filter>
+            <meta-data android:name="android.accounts.AccountAuthenticator" android:resource="@xml/authenticator" />
+        </service>
+    </application>
+</manifest>
