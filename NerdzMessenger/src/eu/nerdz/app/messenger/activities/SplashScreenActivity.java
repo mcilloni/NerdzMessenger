@@ -33,7 +33,7 @@ public class SplashScreenActivity extends PopupActivity {
 
         super.onCreate(savedInstanceState);
 
-        this.setContentView(R.layout.activity_splash_screen);
+        this.setContentView(R.layout.layout_splash_screen);
 
         Log.d(TAG, "Continuing login in 1 second...");
 

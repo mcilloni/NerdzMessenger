@@ -11,36 +11,140 @@ import eu.nerdz.api.messages.Conversation;
 import eu.nerdz.api.messages.Message;
 import eu.nerdz.app.messenger.Messaging;
 import eu.nerdz.app.messenger.R;
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
+import android.content.res.Configuration;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.Pair;
-import android.widget.TextView;
+import android.view.View;
 
 public class ConversationsListActivity extends PopupActivity {
 
     public static final String TAG = "NdzConvListAct";
 
+    private View mConversationsListView;
+    private View mFetchStatusView;
+    private View mNoConversationsMsgView;
+
+    //private boolean mToggled;
+    List<Pair<Conversation, Message>> mConversations;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
 
-        Log.d(TAG, "onCreate()");
+        Log.d(TAG, "onCreate(" + savedInstanceState + ")");
 
         super.onCreate(savedInstanceState);
 
-        this.setContentView(R.layout.activity_conversations_list);
+        this.setContentView(R.layout.layout_conversations_list);
+
+       // this.mToggled = false;
+
+        this.mConversationsListView = this.findViewById(R.id.conversations_list);
+        this.mFetchStatusView = this.findViewById(R.id.fetch_status);
+        this.mNoConversationsMsgView = this.findViewById(R.id.no_conversations_msg);
 
         this.fetchConversations();
 
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration config) {
+
+        Log.d(TAG, "onConfigurationChanged(" + config + ')');
+
+    }
+
+    /**
+     * Shows the progress UI and hides the login form.
+     */
+    @SuppressLint("Override")
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
+    private void showProgress(final boolean show) {
+
+        // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
+        // for very easy animations. If available, use these APIs to fade-in
+        // the progress spinner.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
+            int shortAnimTime = this.getResources().getInteger(android.R.integer.config_shortAnimTime);
+
+            this.mFetchStatusView.setVisibility(View.VISIBLE);
+            this.mFetchStatusView.animate().setDuration(shortAnimTime).alpha(show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
+
+                @SuppressLint("Override")
+                public void onAnimationEnd(Animator animation) {
+
+                    ConversationsListActivity.this.mFetchStatusView.setVisibility(show ? View.VISIBLE : View.GONE);
+                }
+            });
+
+            if (!show) {
+                final View ourView = (this.mConversations == null ? this.mNoConversationsMsgView : this.mConversationsListView);
+                ourView.setVisibility(View.VISIBLE);
+                ourView.animate().setDuration(shortAnimTime).alpha(1).setListener(new AnimatorListenerAdapter() {
+
+                    @SuppressLint("Override")
+                    public void onAnimationEnd(Animator animation) {
+
+                        ourView.setVisibility(View.VISIBLE);
+                    }
+                });
+            } else {
+                final View ourView = (this.mNoConversationsMsgView.getVisibility() == View.VISIBLE ? this.mNoConversationsMsgView : this.mConversationsListView);
+                ourView.setVisibility(View.VISIBLE);
+                ourView.animate().setDuration(shortAnimTime).alpha(0).setListener(new AnimatorListenerAdapter() {
+
+                    @SuppressLint("Override")
+                    public void onAnimationEnd(Animator animation) {
+
+                        ourView.setVisibility(View.GONE);
+                    }
+                });
+            }
+        } else {
+            // The ViewPropertyAnimator APIs are not available, so simply show
+            // and hide the relevant UI components.
+            this.mFetchStatusView.setVisibility(show ? View.VISIBLE : View.GONE);
+            if (!show) {
+                final View ourView = (this.mConversations == null ? this.mNoConversationsMsgView : this.mConversationsListView);
+                ourView.setVisibility(View.VISIBLE);
+            } else {
+                final View ourView = (this.mNoConversationsMsgView.getVisibility() == View.VISIBLE ? this.mNoConversationsMsgView : this.mConversationsListView);
+                ourView.setVisibility(View.GONE);
+            }
+        }
     }
 
     private void fetchConversations() {
 
         Log.d(TAG, "fetchConversations()");
 
+        this.showProgress(true);
         new ConversationFetch().execute();
 
     }
+
+//    private void toggleNoConversationsVisibility(boolean show) {
+//
+//        // if show is equal to the current status, this function is unnecessary.
+//        if (this.mToggled ^ show) {
+//
+//            this.mNoConversationsMsgView.setVisibility(show ? View.VISIBLE : View.GONE);
+//            ;
+//            this.mConversationsListView.setVisibility(show ? View.GONE : View.VISIBLE);
+//
+//            this.mToggled = show;
+//
+//            Log.d(TAG, "visibility of no conversation textview: " + (this.mNoConversationsMsgView.getVisibility() == View.VISIBLE));
+//
+//        }
+//
+//    }
 
     private class ConversationFetch extends AsyncTask<Void, Void, Pair<List<Pair<Conversation, Message>>, Throwable>> {
 
@@ -88,17 +192,20 @@ public class ConversationsListActivity extends PopupActivity {
                     ConversationsListActivity.this.shortToast("Network error: " + t.getLocalizedMessage());
                 else if (t instanceof HttpException)
                     ConversationsListActivity.this.shortToast("HTTP Error: " + t.getLocalizedMessage());
+                else
+                    ConversationsListActivity.this.shortToast("Exception: " + t.getLocalizedMessage());
+                ConversationsListActivity.this.finish();
+                return;
             }
 
-            List<Pair<Conversation, Message>> conversations = result.first;
+            //ConversationsListActivity.this.mConversations = result.first;
 
-            if (conversations == null) {
-                
-                TextView textView = (TextView) ConversationsListActivity.this.findViewById(R.id.no_conversations_msg);
-                textView.setHeight(73);
-                textView.setText(ConversationsListActivity.this.getString(R.string.no_conversations));
-                
-            } else {}
+            // if (conversations == null) {
+
+            ConversationsListActivity.this.showProgress(false);
+            // } else {
+            // ConversationsListActivity.this.toggleNoConversationsVisibility(false);
+            // }
 
         }
 

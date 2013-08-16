@@ -50,7 +50,7 @@ public class LoginActivity extends PopupActivity {
 
         this.mAccountManager = AccountManager.get(this);
 
-        this.setContentView(R.layout.activity_login);
+        this.setContentView(R.layout.layout_login);
 
         this.mUsernameView = ((EditText) findViewById(R.id.username));
         this.mUsernameView.setText(this.mUsername);
@@ -109,7 +109,7 @@ public class LoginActivity extends PopupActivity {
         // for very easy animations. If available, use these APIs to fade-in
         // the progress spinner.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
-            int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
+            int shortAnimTime = this.getResources().getInteger(android.R.integer.config_shortAnimTime);
 
             this.mLoginStatusView.setVisibility(View.VISIBLE);
             this.mLoginStatusView.animate().setDuration(shortAnimTime).alpha(show ? 1 : 0).setListener(new AnimatorListenerAdapter() {

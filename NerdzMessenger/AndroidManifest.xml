@@ -36,6 +36,7 @@
             android:windowSoftInputMode="stateHidden|adjustPan" />
         <activity
             android:name=".activities.ConversationsListActivity"
+            android:configChanges="orientation"
             android:label="@string/conversation_list" >
         </activity>
 
