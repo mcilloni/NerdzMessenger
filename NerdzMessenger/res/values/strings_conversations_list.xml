@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="action_settings">Settings</string>
     <string name="conversation_list">Conversations</string>
     <string name="fetch_progress">Fetching conversations…</string>
     <string name="sad_face"><center><font size="200">:(</font></center></string>
     <string name="no_conversations"><center><font size="28">No conversations… Yet.</font></center></string>
+    <string name="refresh_conversations">Refresh conversations</string>
 
 </resources>

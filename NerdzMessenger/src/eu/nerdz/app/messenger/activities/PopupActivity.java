@@ -1,10 +1,12 @@
 package eu.nerdz.app.messenger.activities;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.widget.Toast;
 
 
+@SuppressLint("Registered")
 public class PopupActivity extends Activity {
     
     protected void popUp(String msg) {

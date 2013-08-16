@@ -30,7 +30,6 @@ public class ConversationsListActivity extends PopupActivity {
     private View mFetchStatusView;
     private View mNoConversationsMsgView;
 
-    //private boolean mToggled;
     List<Pair<Conversation, Message>> mConversations;
 
     @Override
@@ -39,16 +38,18 @@ public class ConversationsListActivity extends PopupActivity {
         Log.d(TAG, "onCreate(" + savedInstanceState + ")");
 
         super.onCreate(savedInstanceState);
+        
+        boolean noSavedState = savedInstanceState == null;
 
-        this.setContentView(R.layout.layout_conversations_list);
-
-       // this.mToggled = false;
+        if(noSavedState)
+            this.setContentView(R.layout.layout_conversations_list);
 
         this.mConversationsListView = this.findViewById(R.id.conversations_list);
         this.mFetchStatusView = this.findViewById(R.id.fetch_status);
         this.mNoConversationsMsgView = this.findViewById(R.id.no_conversations_msg);
 
-        this.fetchConversations();
+        if (noSavedState)
+            this.fetchConversations();
 
     }
 
@@ -121,22 +122,13 @@ public class ConversationsListActivity extends PopupActivity {
 
     }
 
-//    private void toggleNoConversationsVisibility(boolean show) {
-//
-//        // if show is equal to the current status, this function is unnecessary.
-//        if (this.mToggled ^ show) {
-//
-//            this.mNoConversationsMsgView.setVisibility(show ? View.VISIBLE : View.GONE);
-//            ;
-//            this.mConversationsListView.setVisibility(show ? View.GONE : View.VISIBLE);
-//
-//            this.mToggled = show;
-//
-//            Log.d(TAG, "visibility of no conversation textview: " + (this.mNoConversationsMsgView.getVisibility() == View.VISIBLE));
-//
-//        }
-//
-//    }
+    private void updateList() {
+
+        Log.d(TAG, "updateList()");
+        
+        ConversationsListActivity.this.showProgress(false);            
+
+    }
 
     private class ConversationFetch extends AsyncTask<Void, Void, Pair<List<Pair<Conversation, Message>>, Throwable>> {
 
@@ -192,13 +184,7 @@ public class ConversationsListActivity extends PopupActivity {
 
             //ConversationsListActivity.this.mConversations = result.first;
 
-            // if (conversations == null) {
-
-            ConversationsListActivity.this.showProgress(false);
-            // } else {
-            // ConversationsListActivity.this.toggleNoConversationsVisibility(false);
-            // }
-
+            ConversationsListActivity.this.updateList();    
         }
 
     }

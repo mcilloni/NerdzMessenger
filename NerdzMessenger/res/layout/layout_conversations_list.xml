@@ -11,6 +11,7 @@
         android:visibility="gone" >
 
         <ProgressBar
+            android:id="@+id/fetch_progress"
             style="?android:attr/progressBarStyleLarge"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -43,6 +44,7 @@
             android:textAppearance="?android:textAppearanceLarge" />
 
         <android.support.v7.widget.Space
+            android:id="@+id/space"
             android:layout_width="fill_parent"
             android:layout_height="29.0dip" />
 
