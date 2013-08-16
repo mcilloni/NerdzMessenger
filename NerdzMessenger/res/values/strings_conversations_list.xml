@@ -5,6 +5,6 @@
     <string name="conversation_list">Conversations</string>
     <string name="fetch_progress">Fetching conversations…</string>
     <string name="sad_face"><center><font size="200">:(</font></center></string>
-    <string name="no_conversations"><center><font size="24">No conversations… Yet.</font></center></string>
+    <string name="no_conversations"><center><font size="28">No conversations… Yet.</font></center></string>
 
 </resources>

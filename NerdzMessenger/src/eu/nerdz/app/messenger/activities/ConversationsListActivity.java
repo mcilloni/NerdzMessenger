@@ -15,7 +15,6 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
-import android.content.res.Configuration;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -50,13 +49,6 @@ public class ConversationsListActivity extends PopupActivity {
         this.mNoConversationsMsgView = this.findViewById(R.id.no_conversations_msg);
 
         this.fetchConversations();
-
-    }
-
-    @Override
-    public void onConfigurationChanged(Configuration config) {
-
-        Log.d(TAG, "onConfigurationChanged(" + config + ')');
 
     }
 
