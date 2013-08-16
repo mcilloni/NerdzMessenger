@@ -11,10 +11,15 @@ import eu.nerdz.api.messages.Conversation;
 import eu.nerdz.api.messages.Message;
 import eu.nerdz.app.messenger.Messaging;
 import eu.nerdz.app.messenger.R;
+import android.accounts.Account;
+import android.accounts.AccountManager;
+import android.accounts.AccountManagerCallback;
+import android.accounts.AccountManagerFuture;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -22,6 +27,7 @@ import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.util.Pair;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
@@ -41,10 +47,10 @@ public class ConversationsListActivity extends ActionBarActivity {
         Log.d(TAG, "onCreate(" + savedInstanceState + ")");
 
         super.onCreate(savedInstanceState);
-        
+
         boolean noSavedState = savedInstanceState == null;
 
-        if(noSavedState)
+        if (noSavedState)
             this.setContentView(R.layout.layout_conversations_list);
 
         this.mConversationsListView = this.findViewById(R.id.conversations_list);
@@ -55,13 +61,42 @@ public class ConversationsListActivity extends ActionBarActivity {
             this.fetchConversations();
 
     }
-    
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        
+
         this.getMenuInflater().inflate(R.menu.menu_conversations_list, menu);
-        
+
         return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        switch (item.getItemId()) {
+        case R.id.delete_account:
+            AccountManager am = AccountManager.get(this);
+            Account account = am.getAccountsByType(this.getString(R.string.account_type))[0];
+            am.removeAccount(account, new AccountManagerCallback<Boolean>() {
+                
+                @Override
+                public void run(AccountManagerFuture<Boolean> future) {
+                
+                    while (!future.isDone());
+                    
+                    ConversationsListActivity.this.shortToast("Account removed.");
+                    
+                    Intent intent = new Intent(ConversationsListActivity.this, SplashScreenActivity.class);
+                    ConversationsListActivity.this.startActivity(intent);
+                    ConversationsListActivity.this.finish();
+                    
+                }
+            }, null);
+            return true;
+        default:
+            return super.onOptionsItemSelected(item);
+        }
+
     }
 
     /**
@@ -136,12 +171,13 @@ public class ConversationsListActivity extends ActionBarActivity {
     private void updateList() {
 
         Log.d(TAG, "updateList()");
-        
-        ConversationsListActivity.this.showProgress(false);            
+
+        ConversationsListActivity.this.showProgress(false);
 
     }
-    
+
     private void shortToast(String msg) {
+
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
     }
 
@@ -197,9 +233,9 @@ public class ConversationsListActivity extends ActionBarActivity {
                 return;
             }
 
-            //ConversationsListActivity.this.mConversations = result.first;
+            // ConversationsListActivity.this.mConversations = result.first;
 
-            ConversationsListActivity.this.updateList();    
+            ConversationsListActivity.this.updateList();
         }
 
     }

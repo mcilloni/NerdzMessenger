@@ -33,10 +33,12 @@
         <activity
             android:name="eu.nerdz.app.authenticator.LoginActivity"
             android:label="@string/login_login"
+            android:theme="@style/Theme.AppCompat.Light.DarkActionBar"
             android:windowSoftInputMode="stateHidden|adjustPan" />
         <activity
             android:name=".activities.ConversationsListActivity"
-            android:label="@string/conversation_list" >
+            android:label="@string/conversation_list"
+            android:theme="@style/Theme.AppCompat.Light.DarkActionBar" >
         </activity>
 
         <service

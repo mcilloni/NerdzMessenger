@@ -8,11 +8,11 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -30,7 +30,7 @@ import eu.nerdz.app.messenger.Messaging;
 import eu.nerdz.app.messenger.R;
 import eu.nerdz.app.messenger.UserInfo;
 
-public class LoginActivity extends Activity {
+public class LoginActivity extends ActionBarActivity {
 
     private static final String TAG = "NdzLoginAct";
     private AccountManager mAccountManager;

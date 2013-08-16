@@ -7,5 +7,9 @@
         android:icon="@drawable/ic_menu_refresh"
         android:title="@string/refresh_conversations"
         nerdzmsg:showAsAction="always"/>
+    <item
+        android:id="@+id/delete_account"
+        android:icon="@drawable/ic_menu_delete"
+        android:title="@string/delete_account"/>
 
 </menu>
