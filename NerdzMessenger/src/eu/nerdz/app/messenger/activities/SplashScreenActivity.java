@@ -7,11 +7,13 @@ import android.accounts.AccountManagerCallback;
 import android.accounts.AccountManagerFuture;
 import android.accounts.AuthenticatorException;
 import android.accounts.OperationCanceledException;
+import android.app.Activity;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.io.IOException;
 
@@ -20,7 +22,7 @@ import eu.nerdz.api.LoginException;
 import eu.nerdz.app.messenger.Messaging;
 import eu.nerdz.app.messenger.R;
 
-public class SplashScreenActivity extends PopupActivity {
+public class SplashScreenActivity extends Activity {
 
     private static final String TAG = "NdzSplashScreenAct";
 
@@ -152,6 +154,10 @@ public class SplashScreenActivity extends PopupActivity {
 
         }.execute(userName, userID, nerdzU);
 
+    }
+    
+    private void shortToast(String msg) {
+        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
     }
 
 }

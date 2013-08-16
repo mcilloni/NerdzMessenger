@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android" >
-    <item android:id="@+id/refresh_button"
-        android:icon="@drawable/ic_menu_refresh" 
-        android:title="@string/refresh_conversations"/>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:nerdzmsg="http://schemas.android.com/apk/res-auto" >
+
+    <item
+        android:id="@+id/refresh_button"
+        android:icon="@drawable/ic_menu_refresh"
+        android:title="@string/refresh_conversations"
+        nerdzmsg:showAsAction="always"/>
 
 </menu>

@@ -18,11 +18,14 @@ import android.annotation.TargetApi;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.util.Pair;
+import android.view.Menu;
 import android.view.View;
+import android.widget.Toast;
 
-public class ConversationsListActivity extends PopupActivity {
+public class ConversationsListActivity extends ActionBarActivity {
 
     public static final String TAG = "NdzConvListAct";
 
@@ -51,6 +54,14 @@ public class ConversationsListActivity extends PopupActivity {
         if (noSavedState)
             this.fetchConversations();
 
+    }
+    
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        
+        this.getMenuInflater().inflate(R.menu.menu_conversations_list, menu);
+        
+        return super.onCreateOptionsMenu(menu);
     }
 
     /**
@@ -128,6 +139,10 @@ public class ConversationsListActivity extends PopupActivity {
         
         ConversationsListActivity.this.showProgress(false);            
 
+    }
+    
+    private void shortToast(String msg) {
+        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
     }
 
     private class ConversationFetch extends AsyncTask<Void, Void, Pair<List<Pair<Conversation, Message>>, Throwable>> {

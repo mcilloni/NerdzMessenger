@@ -8,6 +8,8 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
+import android.app.Activity;
+import android.app.AlertDialog;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -21,14 +23,14 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 import eu.nerdz.api.ContentException;
 import eu.nerdz.api.LoginException;
 import eu.nerdz.app.messenger.Messaging;
 import eu.nerdz.app.messenger.R;
 import eu.nerdz.app.messenger.UserInfo;
-import eu.nerdz.app.messenger.activities.PopupActivity;
 
-public class LoginActivity extends PopupActivity {
+public class LoginActivity extends Activity {
 
     private static final String TAG = "NdzLoginAct";
     private AccountManager mAccountManager;
@@ -98,6 +100,20 @@ public class LoginActivity extends PopupActivity {
         });
     }
 
+    private void popUp(String msg) {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        try {
+            builder.setMessage(msg);
+            builder.create().show();
+            return;
+        } catch (Throwable t) {}
+    }
+    
+    private void shortToast(String msg) {
+        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+    }
+    
     /**
      * Shows the progress UI and hides the login form.
      */
