@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="action_sign_in">Accedi</string>
+    <string name="login_greeting">Accedi con il tuo utente NERDZ:</string>
+    <string name="login_login">Accedi</string>
+    <string name="login_progress_signing_in">Accesso in corso…</string>
+    <string name="prompt_password">Password</string>
+    <string name="prompt_username">Nome utente</string>
+
+</resources>

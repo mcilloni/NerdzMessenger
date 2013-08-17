@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="error_account_already_present">Esiste già un utente NERDZ</string>
+    <string name="error_field_required">Campo obbligatorio</string>
+    <string name="error_invalid_login">Dati di login invalidi.</string>
+    <string name="error_invalid_password">Password troppo corta</string>
+    <string name="login_successful">L\'utente NERDZ %s è stato aggiunto con successo!</string>
+
+</resources>

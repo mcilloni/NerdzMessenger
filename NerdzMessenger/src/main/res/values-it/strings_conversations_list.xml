@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="conversation_list">Conversazioni</string>
+    <string name="delete_account">Elimina utente</string>
+    <string name="fetch_progress">Scarico le conversazioni…</string>
+    <string name="no_conversations"><center><font size="24">Nessuna conversazione… Per ora.</font></center></string>
+    <string name="refresh_conversations">Aggiorna lista conversazioni</string>
+
+</resources>
