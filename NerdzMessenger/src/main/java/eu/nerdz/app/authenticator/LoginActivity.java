@@ -31,7 +31,7 @@ import eu.nerdz.app.messenger.R;
 import eu.nerdz.app.messenger.UserInfo;
 
 public class LoginActivity extends ActionBarActivity {
-    
+
 
     private static final String TAG = "NdzLoginAct";
     private AccountManager mAccountManager;
@@ -107,8 +107,7 @@ public class LoginActivity extends ActionBarActivity {
         try {
             builder.setMessage(msg);
             builder.create().show();
-            return;
-        } catch (Throwable t) {}
+        } finally {}
     }
     
     private void shortToast(String msg) {
@@ -262,7 +261,7 @@ public class LoginActivity extends ActionBarActivity {
                     
                     if (created) {
                         
-                        AccountAuthenticatorResponse response = (AccountAuthenticatorResponse) extras.getParcelable("accountAuthenticatorResponse");
+                        AccountAuthenticatorResponse response = extras.getParcelable("accountAuthenticatorResponse");
                         
                         Bundle result = new Bundle();
                         result.putString(AccountManager.KEY_ACCOUNT_NAME, userName);
