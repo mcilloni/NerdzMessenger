@@ -38,6 +38,7 @@ public class ConversationsListActivity extends ActionBarActivity {
     private View mConversationsListView;
     private View mFetchStatusView;
     private View mNoConversationsMsgView;
+    private ConversationFetch mConversationFetch;
 
     List<Pair<Conversation, Message>> mConversations;
 
@@ -74,25 +75,28 @@ public class ConversationsListActivity extends ActionBarActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
 
         switch (item.getItemId()) {
-        case R.id.delete_account:
-            AccountManager am = AccountManager.get(this);
-            Account account = am.getAccountsByType(this.getString(R.string.account_type))[0];
-            am.removeAccount(account, new AccountManagerCallback<Boolean>() {
-                
-                @Override
-                public void run(AccountManagerFuture<Boolean> future) {
-                
-                    while (!future.isDone());
-                    
-                    ConversationsListActivity.this.shortToast("Account removed.");
-                    
-                    Intent intent = new Intent(ConversationsListActivity.this, SplashScreenActivity.class);
-                    ConversationsListActivity.this.startActivity(intent);
-                    ConversationsListActivity.this.finish();
-                    
-                }
-            }, null);
-            return true;
+            case R.id.delete_account:
+                AccountManager am = AccountManager.get(this);
+                Account account = am.getAccountsByType(this.getString(R.string.account_type))[0];
+                am.removeAccount(account, new AccountManagerCallback<Boolean>() {
+
+                    @Override
+                    public void run(AccountManagerFuture<Boolean> future) {
+
+                        while (!future.isDone());
+
+                        ConversationsListActivity.this.shortToast("Account removed.");
+
+                        Intent intent = new Intent(ConversationsListActivity.this, SplashScreenActivity.class);
+                        ConversationsListActivity.this.startActivity(intent);
+                        ConversationsListActivity.this.finish();
+
+                    }
+                }, null);
+                return true;
+            case R.id.refresh_button:
+                this.fetchConversations();
+                return true;
         default:
             return super.onOptionsItemSelected(item);
         }
@@ -164,7 +168,10 @@ public class ConversationsListActivity extends ActionBarActivity {
         Log.d(TAG, "fetchConversations()");
 
         this.showProgress(true);
-        new ConversationFetch().execute();
+        if (this.mConversationFetch != null && this.mConversationFetch.getStatus() == AsyncTask.Status.RUNNING) {
+            this.mConversationFetch.cancel(true);
+        }
+        (this.mConversationFetch = new ConversationFetch()).execute();
 
     }
 
@@ -209,6 +216,12 @@ public class ConversationsListActivity extends ActionBarActivity {
                 return Pair.create(null, t);
             }
 
+        }
+
+        @Override
+        protected void onCancelled() {
+            ConversationsListActivity.this.mConversations = null;
+            ConversationsListActivity.this.showProgress(false);
         }
 
         @Override
