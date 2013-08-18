@@ -20,6 +20,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -64,6 +65,17 @@ public class ConversationsListActivity extends ActionBarActivity {
     }
 
     @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+
+        this.mConversationsListView = this.findViewById(R.id.conversations_list);
+        this.mFetchStatusView = this.findViewById(R.id.fetch_status);
+        this.mNoConversationsMsgView = this.findViewById(R.id.no_conversations_msg);
+
+        super.onConfigurationChanged(newConfig);
+
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 
         this.getMenuInflater().inflate(R.menu.menu_conversations_list, menu);
@@ -85,7 +97,7 @@ public class ConversationsListActivity extends ActionBarActivity {
 
                         while (!future.isDone());
 
-                        ConversationsListActivity.this.shortToast("Account removed.");
+                        ConversationsListActivity.this.shortToast(ConversationsListActivity.this.getString(R.string.account_deleted));
 
                         Intent intent = new Intent(ConversationsListActivity.this, SplashScreenActivity.class);
                         ConversationsListActivity.this.startActivity(intent);

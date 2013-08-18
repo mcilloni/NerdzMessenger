@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <string name="account_deleted">Utente eliminato.</string>
     <string name="conversation_list">Conversazioni</string>
     <string name="delete_account">Elimina utente</string>
     <string name="fetch_progress">Scarico le conversazioni…</string>
