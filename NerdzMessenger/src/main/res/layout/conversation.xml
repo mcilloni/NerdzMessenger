@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+  ~ This file is part of NerdzApi-java.
+  ~
+  ~     NerdzApi-java is free software: you can redistribute it and/or modify
+  ~     it under the terms of the GNU General Public License as published by
+  ~     the Free Software Foundation, either version 3 of the License, or
+  ~     (at your option) any later version.
+  ~
+  ~     NerdzApi-java is distributed in the hope that it will be useful,
+  ~     but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~     GNU General Public License for more details.
+  ~
+  ~     You should have received a copy of the GNU General Public License
+  ~     along with NerdzApi-java.  If not, see <http://www.gnu.org/licenses/>.
+  ~
+  ~     (C) 2013 Marco Cilloni <marco.cilloni@yahoo.com>
+  -->
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="6dp">
+
+    <TextView
+            android:id="@+id/msg_preview_field"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:ellipsize="end"
+            android:textSize="12sp"/>
+
+    <TextView
+            android:id="@+id/user_name_field"
+            android:layout_width="100dp"
+            android:layout_height="28dp"
+            android:layout_above="@id/msg_preview_field"
+            android:layout_alignParentLeft="true"
+            android:ellipsize="end"
+            android:textSize="26sp"
+            android:textStyle="bold"/>
+
+    <TextView
+            android:id="@+id/last_date_field"
+            android:layout_width="wrap_content"
+            android:layout_height="28dp"
+            android:layout_alignParentRight="true"
+            android:textSize="20sp"
+            android:textStyle="italic"/>
+
+</RelativeLayout>

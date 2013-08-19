@@ -1,16 +1,6 @@
 
 package eu.nerdz.app.messenger.activities;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
-import eu.nerdz.api.ContentException;
-import eu.nerdz.api.HttpException;
-import eu.nerdz.api.messages.Conversation;
-import eu.nerdz.api.messages.Message;
-import eu.nerdz.app.messenger.Messaging;
-import eu.nerdz.app.messenger.R;
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.accounts.AccountManagerCallback;
@@ -19,6 +9,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.AsyncTask;
@@ -27,21 +18,39 @@ import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.util.Pair;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import java.io.IOException;
+import java.text.DateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+
+import eu.nerdz.api.ContentException;
+import eu.nerdz.api.HttpException;
+import eu.nerdz.api.messages.Conversation;
+import eu.nerdz.api.messages.Message;
+import eu.nerdz.app.messenger.Messaging;
+import eu.nerdz.app.messenger.R;
 
 public class ConversationsListActivity extends ActionBarActivity {
 
     public static final String TAG = "NdzConvListAct";
-
+    ArrayList<Pair<Conversation, Message>> mConversations;
     private View mConversationsListView;
     private View mFetchStatusView;
     private View mNoConversationsMsgView;
+    private ConversationsListAdapter mConversationsListAdapter;
     private ConversationFetch mConversationFetch;
-
-    List<Pair<Conversation, Message>> mConversations;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -50,16 +59,19 @@ public class ConversationsListActivity extends ActionBarActivity {
 
         super.onCreate(savedInstanceState);
 
-        boolean noSavedState = savedInstanceState == null;
+        this.setContentView(R.layout.layout_conversations_list);
 
-        if (noSavedState)
-            this.setContentView(R.layout.layout_conversations_list);
+        this.mConversations = new ArrayList<Pair<Conversation, Message>>(20);
 
         this.mConversationsListView = this.findViewById(R.id.conversations_list);
         this.mFetchStatusView = this.findViewById(R.id.fetch_status);
         this.mNoConversationsMsgView = this.findViewById(R.id.no_conversations_msg);
 
-        if (noSavedState)
+        this.mConversationsListAdapter = new ConversationsListAdapter(this.mConversations);
+
+        ((ListView) this.findViewById(R.id.conversations)).setAdapter(this.mConversationsListAdapter);
+
+        if (savedInstanceState == null)
             this.fetchConversations();
 
     }
@@ -95,7 +107,7 @@ public class ConversationsListActivity extends ActionBarActivity {
                     @Override
                     public void run(AccountManagerFuture<Boolean> future) {
 
-                        while (!future.isDone());
+                        while (!future.isDone()) ;
 
                         ConversationsListActivity.this.shortToast(ConversationsListActivity.this.getString(R.string.account_deleted));
 
@@ -109,8 +121,8 @@ public class ConversationsListActivity extends ActionBarActivity {
             case R.id.refresh_button:
                 this.fetchConversations();
                 return true;
-        default:
-            return super.onOptionsItemSelected(item);
+            default:
+                return super.onOptionsItemSelected(item);
         }
 
     }
@@ -192,6 +204,7 @@ public class ConversationsListActivity extends ActionBarActivity {
         Log.d(TAG, "updateList()");
 
         ConversationsListActivity.this.showProgress(false);
+        this.mConversationsListAdapter.notifyDataSetChanged();
 
     }
 
@@ -200,7 +213,18 @@ public class ConversationsListActivity extends ActionBarActivity {
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
     }
 
-    private class ConversationFetch extends AsyncTask<Void, Void, Pair<List<Pair<Conversation, Message>>, Throwable>> {
+    static class ViewHolder {
+
+        public TextView userName, message, date;
+
+        public ViewHolder(TextView userName, TextView message, TextView date) {
+            this.userName = userName;
+            this.message = message;
+            this.date = date;
+        }
+    }
+
+    private class ConversationFetch extends AsyncTask<Void, Void, Pair<ArrayList<Pair<Conversation, Message>>, Throwable>> {
 
         private Messaging mMessaging;
 
@@ -210,7 +234,7 @@ public class ConversationsListActivity extends ActionBarActivity {
         }
 
         @Override
-        protected Pair<List<Pair<Conversation, Message>>, Throwable> doInBackground(Void... params) {
+        protected Pair<ArrayList<Pair<Conversation, Message>>, Throwable> doInBackground(Void... params) {
 
             Log.d(TAG, "doInBackground()");
 
@@ -218,7 +242,7 @@ public class ConversationsListActivity extends ActionBarActivity {
                 List<Conversation> conversations = this.mMessaging.getConversations();
                 if (conversations == null)
                     return null;
-                List<Pair<Conversation, Message>> newList = new ArrayList<Pair<Conversation, Message>>(conversations.size());
+                ArrayList<Pair<Conversation, Message>> newList = new ArrayList<Pair<Conversation, Message>>(conversations.size());
                 for (Conversation conversation : conversations) {
                     Message sample = this.mMessaging.getFirstMessage(conversation);
                     newList.add(Pair.create(conversation, sample));
@@ -237,7 +261,7 @@ public class ConversationsListActivity extends ActionBarActivity {
         }
 
         @Override
-        protected void onPostExecute(Pair<List<Pair<Conversation, Message>>, Throwable> result) {
+        protected void onPostExecute(Pair<ArrayList<Pair<Conversation, Message>>, Throwable> result) {
 
             Log.d(TAG, "onPostExecute()");
 
@@ -258,10 +282,86 @@ public class ConversationsListActivity extends ActionBarActivity {
                 return;
             }
 
-            // ConversationsListActivity.this.mConversations = result.first;
+            ConversationsListActivity.this.mConversations.clear();
+            ConversationsListActivity.this.mConversations.addAll(result.first);
 
             ConversationsListActivity.this.updateList();
         }
+
+    }
+
+    static String formatDate(Date date, Context context) {
+
+        Calendar now = Calendar.getInstance();
+
+        Calendar yesterday = Calendar.getInstance();
+        yesterday.add(Calendar.DATE, -1);
+
+        Calendar ourDate = Calendar.getInstance();
+        ourDate.setTime(date);
+
+        String buffer = new String(
+                (yesterday.get(Calendar.YEAR) == ourDate.get(Calendar.YEAR) &&
+                 yesterday.get(Calendar.DAY_OF_YEAR) == ourDate.get(Calendar.DAY_OF_YEAR))
+                ? context.getString(R.string.yesterday) + ", "
+                :  (now.get(Calendar.YEAR) == ourDate.get(Calendar.YEAR) &&
+                    now.get(Calendar.DAY_OF_YEAR) == ourDate.get(Calendar.DAY_OF_YEAR))
+                ? ""
+                : DateFormat.getDateTimeInstance().format(date)
+        );
+
+        buffer += DateFormat.getTimeInstance().format(date);
+
+        return buffer;
+
+    }
+
+    private class ConversationsListAdapter extends ArrayAdapter<Pair<Conversation, Message>> {
+
+        private List<Pair<Conversation, Message>> mConversations;
+        private ActionBarActivity mActivity;
+
+        public ConversationsListAdapter(List<Pair<Conversation, Message>> conversations) {
+            super(ConversationsListActivity.this, R.layout.conversation, conversations);
+            this.mConversations = conversations;
+            this.mActivity = ConversationsListActivity.this;
+        }
+
+        @Override
+        public View getView(int position, View rowView, ViewGroup parent) {
+
+            Pair<Conversation, Message> element = this.mConversations.get(position);
+
+            ViewHolder tag;
+
+            if (rowView == null) {
+                LayoutInflater layoutInflater = this.mActivity.getLayoutInflater();
+                rowView = layoutInflater.inflate(R.layout.conversation, null);
+                tag = new ViewHolder(
+                        (TextView) rowView.findViewById(R.id.user_name_field),
+                        (TextView) rowView.findViewById(R.id.msg_preview_field),
+                        (TextView) rowView.findViewById(R.id.last_date_field)
+                );
+                rowView.setTag(tag);
+            } else
+                tag = (ViewHolder) rowView.getTag();
+
+            tag.userName.setText(element.first.getOtherName());
+
+            String message = element.second.getContent();
+
+            int indexof = message.indexOf('\n');
+
+            message = (indexof > -1) ? message.substring(0, indexof) : message;
+
+            tag.message.setText(message);
+
+            tag.date.setText(ConversationsListActivity.formatDate(element.first.getLastDate(), this.mActivity));
+
+            return rowView;
+        }
+
+
 
     }
 

@@ -137,11 +137,11 @@ public class SplashScreenActivity extends Activity {
                         SplashScreenActivity.this.finish();
                         return;
                     } else if (result instanceof HttpException) {
-                        SplashScreenActivity.this.shortToast( "Some weird HTTP response received: " + result.getLocalizedMessage());
+                        SplashScreenActivity.this.shortToast("Some weird HTTP response received: " + result.getLocalizedMessage());
                         SplashScreenActivity.this.finish();
                         return;
                     } else {
-                        SplashScreenActivity.this.shortToast("Received a " + result.getClass().toString() + " exception: "+ result.getLocalizedMessage());
+                        SplashScreenActivity.this.shortToast("Received a " + result.getClass().toString() + " exception: " + result.getLocalizedMessage());
                         SplashScreenActivity.this.finish();
                         return;
                     }
@@ -155,7 +155,7 @@ public class SplashScreenActivity extends Activity {
         }.execute(userName, userID, nerdzU);
 
     }
-    
+
     private void shortToast(String msg) {
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
     }
