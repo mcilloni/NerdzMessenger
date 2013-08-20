@@ -68,7 +68,8 @@
                 android:id="@+id/conversations"
                 android:layout_width="match_parent"
                 android:layout_height="517dp"
-                android:divider="@drawable/divider">
+                android:divider="@drawable/divider"
+                android:dividerHeight="1dp">
         </ListView>
     </LinearLayout>
 

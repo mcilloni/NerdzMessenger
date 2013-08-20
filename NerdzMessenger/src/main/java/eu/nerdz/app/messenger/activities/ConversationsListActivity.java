@@ -300,15 +300,13 @@ public class ConversationsListActivity extends ActionBarActivity {
         Calendar ourDate = Calendar.getInstance();
         ourDate.setTime(date);
 
-        String buffer = new String(
-                (yesterday.get(Calendar.YEAR) == ourDate.get(Calendar.YEAR) &&
+        String buffer = (yesterday.get(Calendar.YEAR) == ourDate.get(Calendar.YEAR) &&
                  yesterday.get(Calendar.DAY_OF_YEAR) == ourDate.get(Calendar.DAY_OF_YEAR))
                 ? context.getString(R.string.yesterday) + ", "
                 :  (now.get(Calendar.YEAR) == ourDate.get(Calendar.YEAR) &&
                     now.get(Calendar.DAY_OF_YEAR) == ourDate.get(Calendar.DAY_OF_YEAR))
                 ? ""
-                : DateFormat.getDateTimeInstance().format(date)
-        );
+                : DateFormat.getDateInstance().format(date);
 
         buffer += DateFormat.getTimeInstance().format(date);
 
@@ -350,13 +348,13 @@ public class ConversationsListActivity extends ActionBarActivity {
 
             String message = element.second.getContent();
 
-            int indexof = message.indexOf('\n');
+            int indexOf = message.indexOf('\n');
 
-            message = (indexof > -1) ? message.substring(0, indexof) : message;
+            message = (indexOf > -1) ? message.substring(0, indexOf) : message;
 
             tag.message.setText(message);
 
-            tag.date.setText(ConversationsListActivity.formatDate(element.first.getLastDate(), this.mActivity));
+            tag.date.setText(ConversationsListActivity.formatDate(element.first.getLastDate(), this.mActivity) + ' ');
 
             return rowView;
         }

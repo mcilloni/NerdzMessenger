@@ -20,34 +20,50 @@
   -->
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_width="fill_parent"
+                android:layout_height="?android:attr/listPreferredItemHeight"
                 android:padding="6dp">
 
     <TextView
-            android:id="@+id/msg_preview_field"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:ellipsize="end"
-            android:textSize="12sp"/>
-
-    <TextView
             android:id="@+id/user_name_field"
-            android:layout_width="100dp"
-            android:layout_height="28dp"
-            android:layout_above="@id/msg_preview_field"
+            android:layout_width="150dp"
+            android:layout_height="22sp"
             android:layout_alignParentLeft="true"
+            android:layout_alignWithParentIfMissing="true"
+            android:gravity="left|bottom"
             android:ellipsize="end"
-            android:textSize="26sp"
+            android:textSize="20sp"
             android:textStyle="bold"/>
 
     <TextView
             android:id="@+id/last_date_field"
-            android:layout_width="wrap_content"
-            android:layout_height="28dp"
+            android:layout_width="match_parent"
+            android:layout_height="15dp"
+            android:layout_toRightOf="@id/user_name_field"
             android:layout_alignParentRight="true"
-            android:textSize="20sp"
+            android:gravity="right|bottom"
+            android:layout_alignWithParentIfMissing="true"
+            android:singleLine="true"
+            android:textColor="#ff9d9d9d"
+            android:textSize="13sp"
+            android:textStyle="italic"/>
+
+    <android.support.v7.widget.Space
+            android:id="@+id/spacer_field"
+            android:layout_below="@id/user_name_field"
+            android:layout_height="8dp"
+            android:layout_width="fill_parent"
+        />
+
+    <TextView
+            android:id="@+id/msg_preview_field"
+            android:layout_below="@id/spacer_field"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:singleLine="true"
+            android:textColor="#ff606060"
+            android:textSize="12sp"
             android:textStyle="italic"/>
 
 </RelativeLayout>
