@@ -29,13 +29,14 @@
 
     <LinearLayout
             android:id="@+id/no_conversations_msg"
+            android:background="#fffff9f7"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:visibility="gone">
 
         <TextView
-                android:id="@+id/textView1"
+                android:id="@+id/sad_face"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_gravity="center"
@@ -49,7 +50,7 @@
                 android:layout_height="29dp"/>
 
         <TextView
-                android:id="@+id/textView2"
+                android:id="@+id/no_conversations"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_gravity="center"
@@ -60,6 +61,7 @@
 
     <LinearLayout
             android:id="@+id/conversations_list"
+            android:background="#fffff9f7"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical">
