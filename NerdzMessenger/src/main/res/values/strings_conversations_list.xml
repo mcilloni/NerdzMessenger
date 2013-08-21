@@ -9,6 +9,7 @@
     <string name="refresh_conversations">Refresh conversations</string>
     <string name="sad_face"><center><font size="200">:(</font></center></string>
     <string name="yesterday">Yesterday</string>
+    <string name="you">You</string>
 
 
 </resources>

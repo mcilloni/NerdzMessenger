@@ -268,7 +268,8 @@ public class ConversationsListActivity extends ActionBarActivity {
             Throwable t = result.second;
 
             if (t != null) {
-                Log.d(TAG, "received a " + t.getClass().toString() + " throwable");
+                Log.w(TAG, "received a " + t.getClass().toString() + " throwable");
+                Log.w(TAG, Log.getStackTraceString(t));
 
                 if (t instanceof ContentException)
                     ConversationsListActivity.this.shortToast("There's something weird in NERDZ Beta. Please, blame Robertof ASAP: " + t.getLocalizedMessage());
@@ -306,7 +307,7 @@ public class ConversationsListActivity extends ActionBarActivity {
                 :  (now.get(Calendar.YEAR) == ourDate.get(Calendar.YEAR) &&
                     now.get(Calendar.DAY_OF_YEAR) == ourDate.get(Calendar.DAY_OF_YEAR))
                 ? ""
-                : DateFormat.getDateInstance().format(date);
+                : DateFormat.getDateInstance().format(date) + ", ";
 
         buffer += DateFormat.getTimeInstance().format(date);
 
@@ -351,6 +352,8 @@ public class ConversationsListActivity extends ActionBarActivity {
             int indexOf = message.indexOf('\n');
 
             message = (indexOf > -1) ? message.substring(0, indexOf) : message;
+
+            message = (element.second.getSenderID() != element.first.getOtherID()) ? this.mActivity.getString(R.string.you) + ": " + message : message;
 
             tag.message.setText(message);
 

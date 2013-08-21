@@ -8,5 +8,6 @@
     <string name="no_conversations"><center><font size="24">Nessuna conversazione… Per ora.</font></center></string>
     <string name="refresh_conversations">Aggiorna lista conversazioni</string>
     <string name="yesterday">Ieri</string>
+    <string name="you">Tu</string>
 
 </resources>
