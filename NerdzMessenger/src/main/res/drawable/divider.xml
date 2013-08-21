@@ -9,7 +9,7 @@
             android:dashGap="1px"
             android:dashWidth="1px"
             android:width="1px"
-            android:color="#8F8F8F" />
+            android:color="#ffdddddd" />
 
     </shape>
 </inset>

@@ -69,7 +69,7 @@
         <ListView
                 android:id="@+id/conversations"
                 android:layout_width="match_parent"
-                android:layout_height="517dp"
+                android:layout_height="fill_parent"
                 android:divider="@drawable/divider"
                 android:dividerHeight="1dp">
         </ListView>
