@@ -22,7 +22,7 @@
         <activity
             android:name=".activities.SplashScreenActivity"
             android:noHistory="true"
-            android:screenOrientation="portrait"
+            android:screenOrientation="nosensor"
             android:theme="@android:style/Theme.NoTitleBar" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -34,6 +34,7 @@
             android:name="eu.nerdz.app.authenticator.LoginActivity"
             android:label="@string/login_login"
             android:theme="@style/Theme.AppCompat.Light.DarkActionBar"
+            android:screenOrientation="nosensor"
             android:windowSoftInputMode="stateHidden|adjustPan" />
         <activity
             android:name=".activities.ConversationsListActivity"
