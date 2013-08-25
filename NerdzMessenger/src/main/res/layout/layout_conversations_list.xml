@@ -60,7 +60,7 @@
     </LinearLayout>
 
     <LinearLayout
-            android:id="@+id/conversations_list"
+            android:id="@+id/conversations_list_layout"
             android:background="#fffff9f7"
             android:layout_width="match_parent"
             android:layout_height="match_parent"

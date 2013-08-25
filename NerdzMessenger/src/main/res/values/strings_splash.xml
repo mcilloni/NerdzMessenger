@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <string name="api_changed">Api implementation changed. Delete this user and relogin.</string>
     <string name="splash_description">NERDZ Messenger is loading…</string>
+    <string name="operation_cancelled">Operation Cancelled.</string>
 
 </resources>

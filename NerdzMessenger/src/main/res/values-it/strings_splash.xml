@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <string name="api_changed">L\'implementazione dell\'API in uso è cambiata. Elimina l\'utente e rifai il login.</string>
     <string name="splash_description">Caricamento di NERDZ Messenger, attendi…</string>
+    <string name="operation_cancelled">Operatione Annullata.</string>
 
 </resources>

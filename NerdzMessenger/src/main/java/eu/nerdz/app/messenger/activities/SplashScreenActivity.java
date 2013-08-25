@@ -9,7 +9,6 @@ import android.accounts.AuthenticatorException;
 import android.accounts.OperationCanceledException;
 import android.app.Activity;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -17,14 +16,17 @@ import android.widget.Toast;
 
 import java.io.IOException;
 
-import eu.nerdz.api.HttpException;
-import eu.nerdz.api.LoginException;
-import eu.nerdz.app.messenger.Messaging;
+import eu.nerdz.api.Nerdz;
+import eu.nerdz.api.UserInfo;
+import eu.nerdz.api.WrongUserInfoTypeException;
+import eu.nerdz.app.messenger.Prefs;
 import eu.nerdz.app.messenger.R;
 
 public class SplashScreenActivity extends Activity {
 
     private static final String TAG = "NdzSplashScreenAct";
+
+    private Nerdz mNerdz = null;
 
     private AccountManager mAM;
 
@@ -41,6 +43,13 @@ public class SplashScreenActivity extends Activity {
 
         this.mAM = AccountManager.get(this);
 
+        try {
+            this.mNerdz = Nerdz.getImplementation(Prefs.getImplementationName());
+        } catch (Exception e) {
+            this.shortToast(e.getLocalizedMessage());
+            this.finish();
+        }
+
         new Handler().postDelayed(new Runnable() {
 
             public void run() {
@@ -56,7 +65,7 @@ public class SplashScreenActivity extends Activity {
 
         Account[] accounts = this.mAM.getAccountsByType(this.getString(R.string.account_type));
 
-        if (accounts.length != 1)
+        if (accounts.length != 1) {
             this.mAM.addAccount(this.getString(R.string.account_type), null, null, null, this, new AccountManagerCallback<Bundle>() {
 
                 @Override
@@ -64,20 +73,19 @@ public class SplashScreenActivity extends Activity {
 
                     Log.d(TAG, "Account auth completed");
 
-                    while (!future.isDone())
-                        ;
+                    while (true)
+                        if (future.isDone()) {
+                            break;
+                        }
 
                     try {
-                        Bundle result = (Bundle) future.getResult();
-                        String userName = result.getString(AccountManager.KEY_ACCOUNT_NAME);
-                        String userID = result.getString(SplashScreenActivity.this.getString(R.string.data_nerdzid));
-                        String nerdzU = result.getString(SplashScreenActivity.this.getString(R.string.data_nerdzu));
-
-                        SplashScreenActivity.this.launchConversations(userName, userID, nerdzU);
+                        Bundle result = future.getResult();
+                        String userData = result.getString(SplashScreenActivity.this.getString(R.string.data_nerdzinfo));
+                        SplashScreenActivity.this.launchConversations(SplashScreenActivity.this.mNerdz.deserializeFromString(userData));
 
                     } catch (OperationCanceledException e) {
                         Log.d(TAG, "Operation Cancelled.");
-                        SplashScreenActivity.this.shortToast("Operation Cancelled.");
+                        SplashScreenActivity.this.shortToast(SplashScreenActivity.this.getString(R.string.operation_cancelled));
                         SplashScreenActivity.this.finish();
                     } catch (IOException e) {
                         Log.e(TAG, "WTF?? IOException:" + e.getLocalizedMessage());
@@ -85,74 +93,31 @@ public class SplashScreenActivity extends Activity {
                     } catch (AuthenticatorException e) {
                         Log.e(TAG, "WTF?? AuthenticatorException:" + e.getLocalizedMessage());
                         SplashScreenActivity.this.finish();
+                    } catch (WrongUserInfoTypeException e) {
+                        Log.e(TAG, SplashScreenActivity.this.getString(R.string.api_changed));
+                        SplashScreenActivity.this.finish();
                     }
                 }
             }, null);
-        else {
-            String userName = accounts[0].name;
-            String userID = this.mAM.getUserData(accounts[0], this.getString(R.string.data_nerdzid));
-            String nerdzU = this.mAM.getUserData(accounts[0], this.getString(R.string.data_nerdzu));
+        } else {
+            String userData = this.mAM.getUserData(accounts[0], this.getString(R.string.data_nerdzinfo));
 
-            SplashScreenActivity.this.launchConversations(userName, userID, nerdzU);
+            try {
+                SplashScreenActivity.this.launchConversations(SplashScreenActivity.this.mNerdz.deserializeFromString(userData));
+            } catch (WrongUserInfoTypeException e) {
+                Log.e(TAG, SplashScreenActivity.this.getString(R.string.api_changed));
+                SplashScreenActivity.this.finish();
+            }
         }
     }
 
-    private void launchConversations(String userName, String userID, String nerdzU) {
+    private void launchConversations(UserInfo userInfo) {
 
-        Log.d(TAG, "userName=" + userName);
-        Log.d(TAG, "userID=" + userID);
-        Log.d(TAG, "NerdzU=" + nerdzU);
+        Log.d(TAG, "userInfo=" + userInfo);
 
-        new AsyncTask<String, Void, Throwable>() {
-
-            @Override
-            protected Throwable doInBackground(String... params) {
-
-                try {
-                    Messaging.get().init(params[0], params[1], params[2]);
-                } catch (Throwable t) {
-                    return t;
-                }
-
-                return null;
-            }
-
-            @Override
-            protected void onPostExecute(Throwable result) {
-
-                if (result != null) {
-                    if (result instanceof LoginException) {
-                        SplashScreenActivity.this.mAM.removeAccount(SplashScreenActivity.this.mAM.getAccountsByType(SplashScreenActivity.this.getString(R.string.account_type))[0], new AccountManagerCallback<Boolean>() {
-
-                            @Override
-                            public void run(AccountManagerFuture<Boolean> arg0) {
-
-                                SplashScreenActivity.this.shortToast("Login data is invalid. User account deleted.");
-                                SplashScreenActivity.this.keepOnLoggingIn();
-                                return;
-                            }
-                        }, null);
-                    } else if (result instanceof IOException) {
-                        SplashScreenActivity.this.shortToast("Cannot connect to the server for authentication: " + result.getLocalizedMessage());
-                        SplashScreenActivity.this.finish();
-                        return;
-                    } else if (result instanceof HttpException) {
-                        SplashScreenActivity.this.shortToast("Some weird HTTP response received: " + result.getLocalizedMessage());
-                        SplashScreenActivity.this.finish();
-                        return;
-                    } else {
-                        SplashScreenActivity.this.shortToast("Received a " + result.getClass().toString() + " exception: " + result.getLocalizedMessage());
-                        SplashScreenActivity.this.finish();
-                        return;
-                    }
-
-                } else {
-                    Intent intent = new Intent(SplashScreenActivity.this, ConversationsListActivity.class);
-                    SplashScreenActivity.this.startActivity(intent);
-                }
-            }
-
-        }.execute(userName, userID, nerdzU);
+        Intent intent = new Intent(SplashScreenActivity.this, ConversationsListActivity.class);
+        intent.putExtra(this.getString(R.string.data_nerdzinfo), userInfo);
+        SplashScreenActivity.this.startActivity(intent);
 
     }
 

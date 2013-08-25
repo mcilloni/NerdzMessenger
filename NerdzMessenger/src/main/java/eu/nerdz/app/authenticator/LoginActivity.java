@@ -9,6 +9,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -17,6 +18,7 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.util.Pair;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
@@ -25,10 +27,13 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 import eu.nerdz.api.ContentException;
+import eu.nerdz.api.InvalidManagerException;
 import eu.nerdz.api.LoginException;
-import eu.nerdz.app.messenger.Messaging;
+import eu.nerdz.api.Nerdz;
+import eu.nerdz.api.UserInfo;
+import eu.nerdz.api.WrongUserInfoTypeException;
+import eu.nerdz.app.messenger.Prefs;
 import eu.nerdz.app.messenger.R;
-import eu.nerdz.app.messenger.UserInfo;
 
 public class LoginActivity extends ActionBarActivity {
 
@@ -203,17 +208,20 @@ public class LoginActivity extends ActionBarActivity {
         }
     }
 
-    public class UserLoginTask extends AsyncTask<String, Void, Throwable> {
+    public class UserLoginTask extends AsyncTask<String, Void, Pair<UserInfo,Throwable>> {
 
         @Override
-        protected Throwable doInBackground(String... params) {
+        protected Pair<UserInfo,Throwable> doInBackground(String... params) {
 
             Log.i(TAG, "logging in...");
+
             try {
-                Messaging.get().initWithLoginData(Messaging.doLogin(LoginActivity.this.mUsername, LoginActivity.this.mPassword));
-                return null;
+
+                Nerdz nerdz = Nerdz.getImplementation(Prefs.getImplementationName());
+
+                return Pair.create(nerdz.logAndGetInfo(params[0], params[1]), null);
             } catch (Throwable t) {
-                return t;
+                return Pair.create(null,t);
             }
         }
 
@@ -225,12 +233,14 @@ public class LoginActivity extends ActionBarActivity {
         }
 
         @Override
-        protected void onPostExecute(Throwable throwable) {
+        protected void onPostExecute(Pair<UserInfo,Throwable> result) {
 
             Log.i(TAG, "onPostExecute()");
 
             LoginActivity.this.showProgress(false);
             LoginActivity.this.mAuthTask = null;
+
+            Throwable throwable = result.second;
 
             if (throwable != null) {
                 if ((throwable instanceof LoginException)) {
@@ -243,17 +253,16 @@ public class LoginActivity extends ActionBarActivity {
             }
             
             Log.d(TAG, "No exception raised . Going ahead...");
-            
-            UserInfo userInfo = Messaging.get().getUserInfo();
+
+            UserInfo userInfo = result.first;
             String userName = userInfo.getUsername();
-            Integer userID = Integer.valueOf(userInfo.getUserID());
             Account account = new Account(userName, LoginActivity.this.getString(R.string.account_type));
             
             try {
+                Nerdz nerdz = Nerdz.getImplementation(Prefs.getImplementationName());
                 Bundle userData = new Bundle();
-                userData.putString(LoginActivity.this.getString(R.string.data_nerdzid), userID.toString());
-                userData.putString(LoginActivity.this.getString(R.string.data_nerdzu), userInfo.getToken());
-                boolean created = LoginActivity.this.mAccountManager.addAccountExplicitly(account, userInfo.getToken(), userData);
+                userData.putString(LoginActivity.this.getString(R.string.data_nerdzinfo), nerdz.serializeToString(userInfo));
+                boolean created = LoginActivity.this.mAccountManager.addAccountExplicitly(account, null, userData);
                 Bundle extras = LoginActivity.this.getIntent().getExtras();
                 
                 if (extras != null) {
@@ -263,12 +272,11 @@ public class LoginActivity extends ActionBarActivity {
                         
                         AccountAuthenticatorResponse response = extras.getParcelable("accountAuthenticatorResponse");
                         
-                        Bundle result = new Bundle();
-                        result.putString(AccountManager.KEY_ACCOUNT_NAME, userName);
-                        result.putString(AccountManager.KEY_ACCOUNT_TYPE, LoginActivity.this.getString(R.string.account_type));
-                        result.putString(LoginActivity.this.getString(R.string.data_nerdzid), userID.toString());
-                        result.putString(LoginActivity.this.getString(R.string.data_nerdzu), userInfo.getToken());
-                        response.onResult(result);
+                        Bundle operationResult = new Bundle();
+                        operationResult.putString(AccountManager.KEY_ACCOUNT_NAME, userName);
+                        operationResult.putString(AccountManager.KEY_ACCOUNT_TYPE, LoginActivity.this.getString(R.string.account_type));
+                        operationResult.putString(LoginActivity.this.getString(R.string.data_nerdzinfo), nerdz.serializeToString(userInfo));
+                        response.onResult(operationResult);
                         
                         Log.d(TAG, "showing a Toast...");
                         
@@ -279,10 +287,19 @@ public class LoginActivity extends ActionBarActivity {
                 
                 Log.d(TAG, "onPostExecute() has finished correctly.");
                 LoginActivity.this.finish();
-                return;
                 
             } catch (ContentException e) {
-                    LoginActivity.this.popUp("OH NOES EXCEPTIONZ!!!!1111!\n" + e.getLocalizedMessage());
+                LoginActivity.this.popUp("OH NOES EXCEPTIONZ!!!!1111!\n" + e.getLocalizedMessage());
+            } catch (ClassNotFoundException e) {
+                LoginActivity.this.popUp("OH NOES EXCEPTIONZ!!!!1111!\n" + e.getLocalizedMessage());
+            } catch (InvalidManagerException e) {
+                LoginActivity.this.popUp("OH NOES EXCEPTIONZ!!!!1111!\n" + e.getLocalizedMessage());
+            } catch (InstantiationException e) {
+                LoginActivity.this.popUp("OH NOES EXCEPTIONZ!!!!1111!\n" + e.getLocalizedMessage());
+            } catch (IllegalAccessException e) {
+                LoginActivity.this.popUp("OH NOES EXCEPTIONZ!!!!1111!\n" + e.getLocalizedMessage());
+            } catch (WrongUserInfoTypeException e) {
+                LoginActivity.this.popUp("OH NOES EXCEPTIONZ!!!!1111!\n" + e.getLocalizedMessage());
             }
         }
     }

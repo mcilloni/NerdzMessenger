@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="data_nerdzid">NerdzID</string>
-    <string name="data_nerdzu">NerdzU</string>
+    <string name="data_nerdzinfo">NerdzInfo</string>
     <string name="error_account_already_present">Only one NERDZ account is allowed</string>
     <string name="error_field_required">This field is required</string>
     <string name="error_invalid_login">Login data is invalid.</string>
