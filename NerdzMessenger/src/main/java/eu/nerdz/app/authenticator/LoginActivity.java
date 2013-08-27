@@ -164,7 +164,7 @@ public class LoginActivity extends ActionBarActivity {
         Log.i(TAG, "attemptLogin()");
 
         // Hide input method from screen.
-        ((InputMethodManager) getSystemService("input_method")).hideSoftInputFromWindow(getWindow().getCurrentFocus().getWindowToken(), 0);
+        ((InputMethodManager) this.getSystemService("input_method")).hideSoftInputFromWindow(this.getWindow().getCurrentFocus().getWindowToken(), 0);
 
         if (this.mAuthTask != null)
             return;

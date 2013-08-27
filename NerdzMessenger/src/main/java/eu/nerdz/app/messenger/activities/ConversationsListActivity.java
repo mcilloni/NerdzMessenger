@@ -11,7 +11,6 @@ import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -147,7 +146,7 @@ public class ConversationsListActivity extends ActionBarActivity {
                     }
                 }, null);
                 return true;
-            case R.id.refresh_button:
+            case R.id.clist_refresh_button:
                 this.fetchConversations();
                 return true;
             default:

@@ -1,0 +1,10 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:nerdzmsg="http://schemas.android.com/apk/res-auto" >
+
+    <item
+            android:id="@+id/msgs_refresh_button"
+            android:icon="@drawable/ic_menu_refresh"
+            android:title="@string/refresh_conversations"
+            nerdzmsg:showAsAction="always"/>
+
+</menu>

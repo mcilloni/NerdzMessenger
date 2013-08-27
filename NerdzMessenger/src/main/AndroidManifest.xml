@@ -50,7 +50,7 @@
                 android:label="@string/title_activity_conversation"
                 android:screenOrientation="nosensor"
                 android:theme="@style/Theme.AppCompat.Light.DarkActionBar"
-                android:windowSoftInputMode="stateHidden|adjustResize">
+                android:windowSoftInputMode="stateHidden|adjustPan">
             <meta-data
                     android:name="android.support.PARENT_ACTIVITY"
                     android:value=".activities.ConversationsListActivity"/>
