@@ -1,0 +1,9 @@
+<resources>
+
+    <string name="wrong_parameters">Wrong parameters passed to activity.</string>
+    <string name="title_activity_conversation">Conversation</string>
+    <string name="messages_fetch_message">Fetching messages...</string>
+    <string name="lol">LOL</string>
+    <string name="message_hint">Write a message</string>
+
+</resources>

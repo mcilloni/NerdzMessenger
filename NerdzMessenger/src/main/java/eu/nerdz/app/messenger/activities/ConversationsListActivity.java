@@ -23,6 +23,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -48,7 +49,7 @@ import eu.nerdz.app.messenger.R;
 
 public class ConversationsListActivity extends ActionBarActivity {
 
-    public static final String TAG = "NdzConvListAct";
+    public static final String TAG = "NdzConvsListAct";
     ArrayList<Pair<Conversation, Message>> mConversations;
     private View mConversationsListLayoutView;
     private View mFetchStatusView;
@@ -75,32 +76,40 @@ public class ConversationsListActivity extends ActionBarActivity {
 
         this.mConversationsListAdapter = new ConversationsListAdapter(this.mConversations);
 
-        ((ListView) this.findViewById(R.id.conversations)).setAdapter(this.mConversationsListAdapter);
+        ListView conversationsList = (ListView) this.findViewById(R.id.conversations);
+        conversationsList.setAdapter(this.mConversationsListAdapter);
+        conversationsList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
-        Intent intent = this.getIntent();
-        Serializable serializable = intent.getSerializableExtra(this.getString(R.string.data_nerdzinfo));
 
-        if (serializable == null || ! (serializable instanceof UserInfo)) {
-            this.shortToast(R.string.error_invalid_login);
-            this.finish();
-        } else {
-            this.mUserInfo = (UserInfo) serializable;
-        }
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+                Log.d(TAG, "onItemClick()");
+
+                Intent intent = new Intent(ConversationsListActivity.this, ConversationActivity.class);
+                intent.putExtra(ConversationsListActivity.this.getString(R.string.data_nerdzinfo), ConversationsListActivity.this.mUserInfo);
+                intent.putExtra(ConversationsListActivity.this.getString(R.string.selected_item), ConversationsListActivity.this.mConversations.get(position).first);
+                ConversationsListActivity.this.startActivity(intent);
+            }
+        });
 
         if (savedInstanceState == null) {
-            this.fetchConversations();
+            if (this.mUserInfo == null) {
+                Intent intent = this.getIntent();
+                Serializable serializable = intent.getSerializableExtra(this.getString(R.string.data_nerdzinfo));
+
+                if (serializable == null || ! (serializable instanceof UserInfo)) {
+                    this.shortToast(R.string.error_invalid_login);
+                    this.finish();
+                } else {
+                    this.mUserInfo = (UserInfo) serializable;
+                }
+            }
+        } else {
+            this.mUserInfo = (UserInfo) savedInstanceState.getSerializable(this.getString(R.string.data_nerdzinfo));
         }
 
-    }
-
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-
-        this.mConversationsListLayoutView = this.findViewById(R.id.conversations_list_layout);
-        this.mFetchStatusView = this.findViewById(R.id.fetch_status);
-        this.mNoConversationsMsgView = this.findViewById(R.id.no_conversations_msg);
-
-        super.onConfigurationChanged(newConfig);
+        this.fetchConversations();
 
     }
 
@@ -147,8 +156,25 @@ public class ConversationsListActivity extends ActionBarActivity {
 
     }
 
+    @Override
+    public void onRestoreInstanceState (Bundle outState) {
+        Log.d(TAG, "onRestoreInstanceState(" + outState + ")");
+
+        super.onRestoreInstanceState(outState);
+
+    }
+
+    @Override
+    public void onSaveInstanceState (Bundle outState) {
+
+        Log.d(TAG, "onSaveInstanceState()");
+
+        outState.putSerializable(this.getString(R.string.data_nerdzinfo), this.mUserInfo);
+        super.onSaveInstanceState(outState);
+    }
+
     /**
-     * Shows the progress UI and hides the login form.
+     * Shows the progress UI, or hides it
      */
     @SuppressLint("Override")
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
@@ -287,7 +313,7 @@ public class ConversationsListActivity extends ActionBarActivity {
 
         @Override
         protected void onCancelled() {
-            ConversationsListActivity.this.mConversations = null;
+            ConversationsListActivity.this.mConversations.clear();
             ConversationsListActivity.this.showProgress(false);
         }
 
@@ -353,7 +379,7 @@ public class ConversationsListActivity extends ActionBarActivity {
         private ActionBarActivity mActivity;
 
         public ConversationsListAdapter(List<Pair<Conversation, Message>> conversations) {
-            super(ConversationsListActivity.this, R.layout.conversation, conversations);
+            super(ConversationsListActivity.this, R.layout.conversation_list_element, conversations);
             this.mConversations = conversations;
             this.mActivity = ConversationsListActivity.this;
         }
@@ -367,7 +393,7 @@ public class ConversationsListActivity extends ActionBarActivity {
 
             if (rowView == null) {
                 LayoutInflater layoutInflater = this.mActivity.getLayoutInflater();
-                rowView = layoutInflater.inflate(R.layout.conversation, null);
+                rowView = layoutInflater.inflate(R.layout.conversation_list_element, null);
                 tag = new ViewHolder(
                         (TextView) rowView.findViewById(R.id.user_name_field),
                         (TextView) rowView.findViewById(R.id.msg_preview_field),

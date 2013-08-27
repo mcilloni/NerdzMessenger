@@ -1,0 +1,101 @@
+<merge xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <LinearLayout
+            android:id="@+id/conversation_fetch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+        <ProgressBar
+                android:id="@+id/conversation_progress"
+                style="?android:attr/progressBarStyleLarge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"/>
+
+        <TextView
+                android:id="@+id/conversation_status_message"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:fontFamily="sans-serif-light"
+                android:text="@string/messages_fetch_message"
+                android:textAppearance="?android:textAppearanceMedium"/>
+    </LinearLayout>
+
+
+    <RelativeLayout
+            android:id="@+id/conversation_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+        <LinearLayout
+                android:id="@+id/send_box"
+                android:layout_alignParentBottom="true"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:minHeight="50dp">
+
+            <View
+                    android:id="@+id/separator1"
+                    android:layout_gravity="top"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="#ffc9c9c9"/>
+
+            <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginTop="2dp"
+                    android:orientation="horizontal">
+
+                <EditText
+                        android:id="@+id/new_message_text"
+                        android:hint="@string/message_hint"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_gravity="bottom"
+                        android:inputType="textCapSentences|textMultiLine"
+                        android:maxLines="4"
+                        />
+
+                <Button
+                        android:id="@+id/send_button"
+                        android:layout_alignParentBottom="true"
+                        android:layout_alignParentRight="true"
+                        android:layout_below="@id/separator1"
+                        android:layout_width="80dp"
+                        android:layout_height="50dp"
+                        android:layout_gravity="bottom"
+                        android:text="@string/lol"
+                        android:textStyle="bold"/>
+            </LinearLayout>
+        </LinearLayout>
+
+        <ListView
+                android:id="@+id/conversation"
+                android:layout_alignParentTop="true"
+                android:layout_above="@id/send_box"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:divider="@drawable/divider_full"
+                android:dividerHeight="1dp">
+        </ListView>
+
+        <View
+                android:id="@+id/separator0"
+                android:layout_below="@id/conversation"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#ffeaeaea"/>
+
+    </RelativeLayout>
+
+</merge>

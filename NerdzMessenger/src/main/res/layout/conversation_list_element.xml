@@ -20,7 +20,7 @@
   -->
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:layout_width="fill_parent"
+                android:layout_width="match_parent"
                 android:layout_height="?android:attr/listPreferredItemHeight"
                 android:padding="6dp">
 
@@ -52,13 +52,13 @@
             android:id="@+id/spacer_field"
             android:layout_below="@id/user_name_field"
             android:layout_height="8dp"
-            android:layout_width="fill_parent"
-        />
+            android:layout_width="match_parent"
+            />
 
     <TextView
             android:id="@+id/msg_preview_field"
             android:layout_below="@id/spacer_field"
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ellipsize="end"
             android:singleLine="true"

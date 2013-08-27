@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+
+    <string name="wrong_parameters">Parametri errati passati a questa Attività. Impossibile continuare</string>
+    <string name="messages_fetch_message">Scarico i messaggi...</string>
+    <string name="message_hint">Scrivi un messaggio</string>
+
+</resources>
