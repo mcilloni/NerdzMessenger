@@ -12,7 +12,9 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.text.util.Linkify;
 import android.util.Log;
 import android.util.Pair;
@@ -64,6 +66,7 @@ public class ConversationActivity extends ActionBarActivity {
     View mConversationFetchView;
     View mConversationLayoutView;
     EditText mMessageBox;
+    Button mButton;
 
     MessageFetch mMessageFetch;
     ConversationAdapter mConversationAdapter;
@@ -108,10 +111,34 @@ public class ConversationActivity extends ActionBarActivity {
 
         this.mListView = (ListView) this.findViewById(R.id.conversation);
         this.mListView.setAdapter(this.mConversationAdapter);
+        this.mListView.setTranscriptMode(ListView.TRANSCRIPT_MODE_NORMAL);
+        this.mListView.setStackFromBottom(true);
 
         this.mMessageBox = (EditText) this.findViewById(R.id.new_message_text);
+        this.mMessageBox.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
-        ((Button) this.findViewById(R.id.send_button)).setOnClickListener(new View.OnClickListener() {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (TextUtils.isEmpty(s)) {
+                    ConversationActivity.this.mButton.setText(R.string.lol);
+                } else {
+                    ConversationActivity.this.mButton.setText(R.string.send);
+                }
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+
+        this.mButton = (Button) this.findViewById(R.id.send_button);
+        this.mButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
@@ -119,13 +146,14 @@ public class ConversationActivity extends ActionBarActivity {
 
                 String text = ConversationActivity.this.mMessageBox.getText().toString();
 
-                if(TextUtils.isEmpty(text)) {
+                if (TextUtils.isEmpty(text)) {
                     text = "LOL";
                 }
 
                 try {
                     ((InputMethodManager) ConversationActivity.this.getSystemService("input_method")).hideSoftInputFromWindow(ConversationActivity.this.getWindow().getCurrentFocus().getWindowToken(), 0);
-                } catch (NullPointerException e) {} //Ignore; nobody will get hurt from this.
+                } catch (NullPointerException e) {
+                } //Ignore; nobody will get hurt from this.
 
                 ConversationActivity.this.showProgress(true);
 
@@ -160,7 +188,7 @@ public class ConversationActivity extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void scrollDownList() {
+    /*private void scrollDownList() {
         this.mListView.post(new Runnable() {
             @Override
             public void run() {
@@ -168,7 +196,7 @@ public class ConversationActivity extends ActionBarActivity {
                 ConversationActivity.this.mListView.setSelection(ConversationActivity.this.mConversationAdapter.getCount() - 1);
             }
         });
-    }
+    }*/
 
     /**
      * Shows the progress UI, or hides it
@@ -328,12 +356,11 @@ public class ConversationActivity extends ActionBarActivity {
             ConversationActivity.this.mMessages.addAll(result.first);
             ConversationActivity.this.mConversationAdapter.notifyDataSetChanged();
 
-            ConversationActivity.this.scrollDownList();
+            //ConversationActivity.this.scrollDownList();
 
 
         }
     }
-
 
 
     private class MessageSender extends AsyncTask<String, Void, Pair<Message, Throwable>> {
@@ -354,7 +381,7 @@ public class ConversationActivity extends ActionBarActivity {
 
             ConversationActivity.this.showProgress(false);
 
-            if(t != null) {
+            if (t != null) {
 
                 Log.d(TAG, Log.getStackTraceString(t));
 
@@ -380,7 +407,7 @@ public class ConversationActivity extends ActionBarActivity {
             ConversationActivity.this.mMessages.add(result.first);
             ConversationActivity.this.mConversationAdapter.notifyDataSetChanged();
 
-            ConversationActivity.this.scrollDownList();
+            //ConversationActivity.this.scrollDownList();
 
             ConversationActivity.this.mMessageBox.setText("");
 

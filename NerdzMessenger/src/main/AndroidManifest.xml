@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="eu.nerdz.app.messenger"
           android:versionCode="1"
-          android:versionName="0.0-incomplete">
+          android:versionName="0.1-prealpha">
 
     <uses-sdk
             android:minSdkVersion="7"
@@ -50,7 +50,7 @@
                 android:label="@string/title_activity_conversation"
                 android:screenOrientation="nosensor"
                 android:theme="@style/Theme.AppCompat.Light.DarkActionBar"
-                android:windowSoftInputMode="stateHidden|adjustPan">
+                android:windowSoftInputMode="stateHidden|adjustResize">
             <meta-data
                     android:name="android.support.PARENT_ACTIVITY"
                     android:value=".activities.ConversationsListActivity"/>

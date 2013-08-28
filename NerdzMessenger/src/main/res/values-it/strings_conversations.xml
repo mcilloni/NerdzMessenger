@@ -5,6 +5,7 @@
     <string name="wrong_parameters">Parametri errati passati a questa Attività. Impossibile continuare</string>
     <string name="messages_fetch_message">Attendi...</string>
     <string name="message_hint">Scrivi un messaggio</string>
+    <string name="send">INVIA</string>
     <string name="antiflood_wait">Antiflood attivo, attendi ancora. Impaziente?</string>
 
 </resources>

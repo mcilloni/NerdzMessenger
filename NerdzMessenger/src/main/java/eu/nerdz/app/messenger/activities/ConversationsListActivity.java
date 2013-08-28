@@ -97,7 +97,7 @@ public class ConversationsListActivity extends ActionBarActivity {
                 Intent intent = this.getIntent();
                 Serializable serializable = intent.getSerializableExtra(this.getString(R.string.data_nerdzinfo));
 
-                if (serializable == null || ! (serializable instanceof UserInfo)) {
+                if (serializable == null || !(serializable instanceof UserInfo)) {
                     this.shortToast(R.string.error_invalid_login);
                     this.finish();
                 } else {
@@ -156,7 +156,7 @@ public class ConversationsListActivity extends ActionBarActivity {
     }
 
     @Override
-    public void onRestoreInstanceState (Bundle outState) {
+    public void onRestoreInstanceState(Bundle outState) {
         Log.d(TAG, "onRestoreInstanceState(" + outState + ")");
 
         super.onRestoreInstanceState(outState);
@@ -164,7 +164,7 @@ public class ConversationsListActivity extends ActionBarActivity {
     }
 
     @Override
-    public void onSaveInstanceState (Bundle outState) {
+    public void onSaveInstanceState(Bundle outState) {
 
         Log.d(TAG, "onSaveInstanceState()");
 
