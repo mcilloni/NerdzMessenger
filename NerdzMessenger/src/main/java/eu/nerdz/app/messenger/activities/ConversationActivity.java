@@ -7,14 +7,21 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.LevelListDrawable;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.text.Editable;
+import android.text.Html;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.text.method.LinkMovementMethod;
 import android.text.util.Linkify;
 import android.util.Log;
 import android.util.Pair;
@@ -34,12 +41,18 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.DateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import eu.nerdz.api.BadStatusException;
 import eu.nerdz.api.ContentException;
@@ -181,9 +194,12 @@ public class ConversationActivity extends ActionBarActivity {
                 this.finish();
                 return true;
 
-            case R.id.msgs_refresh_button:
+            case R.id.msgs_refresh_button: {
+                this.mMessages.clear();
+                this.mListView.invalidateViews();
                 this.getMessages();
                 return true;
+            }
         }
         return super.onOptionsItemSelected(item);
     }
@@ -299,10 +315,12 @@ public class ConversationActivity extends ActionBarActivity {
     static class ViewHolder {
 
         public TextView message, date;
+        public boolean hreffed;
 
         public ViewHolder(TextView message, TextView date) {
             this.message = message;
             this.date = date;
+            this.hreffed = false;
         }
     }
 
@@ -428,6 +446,20 @@ public class ConversationActivity extends ActionBarActivity {
 
         }
 
+        private View newRow() {
+            LayoutInflater layoutInflater = this.mActivity.getLayoutInflater();
+            View rowView = layoutInflater.inflate(R.layout.conversation_message, null);
+            rowView.setTag(new ViewHolder(
+                    (TextView) rowView.findViewById(R.id.message_text_view),
+                    (TextView) rowView.findViewById(R.id.message_received_date)
+            ));
+            return rowView;
+        }
+
+        private boolean isValidRow(View rowView) {
+            return rowView != null && !((ViewHolder) rowView.getTag()).hreffed;
+        }
+
         @Override
         public View getView(int position, View rowView, ViewGroup parent) {
 
@@ -435,17 +467,9 @@ public class ConversationActivity extends ActionBarActivity {
 
             ViewHolder tag;
 
-            if (rowView == null) {
-                LayoutInflater layoutInflater = this.mActivity.getLayoutInflater();
-                rowView = layoutInflater.inflate(R.layout.conversation_message, null);
-                tag = new ViewHolder(
-                        (TextView) rowView.findViewById(R.id.message_text_view),
-                        (TextView) rowView.findViewById(R.id.message_received_date)
-                );
-                rowView.setTag(tag);
-            } else {
-                tag = (ViewHolder) rowView.getTag();
-            }
+            rowView = this.isValidRow(rowView) ? rowView : this.newRow() ;
+            tag = (ViewHolder) rowView.getTag();
+
 
             RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) tag.message.getLayoutParams();
 
@@ -464,8 +488,16 @@ public class ConversationActivity extends ActionBarActivity {
 
             tag.message.setLayoutParams(layoutParams);
 
-            tag.message.setText(element.getContent());
+            String text = ConversationActivity.replaceBbcode(element.getContent().replaceAll("\n", "<br>"));
+            tag.message.setText(Html.fromHtml(text, new MessageImageLoader(tag.message), null));
+
             Linkify.addLinks(tag.message, Linkify.ALL);
+
+            tag.message.setMovementMethod(LinkMovementMethod.getInstance());
+
+            if (text.contains("<a href=")) { //this hreffed thing disables recycling of views containing links (fixes weird bugs)
+                tag.hreffed = true;
+            }
 
             tag.date.setText(ConversationActivity.formatDate(element.getDate(), this.mActivity));
 
@@ -477,6 +509,194 @@ public class ConversationActivity extends ActionBarActivity {
             return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, r.getDisplayMetrics());
         }
 
+    }
+
+    static String replaceBbcode(String message) {
+        return ConversationActivity.replaceBoldItalicsUnderlineDeleted(ConversationActivity.replaceSmallBig(ConversationActivity.replaceUrls(ConversationActivity.replaceImages(message))));
+    }
+
+    /**
+     * Parses images tags.
+     *
+     * @param message A message to be parsed
+     * @return A string in which all [img]s have been replaced with their URLs
+     */
+    static String replaceImages(String message) {
+        Matcher matcher = Pattern.compile("\\[img\\](.*?)\\[/img\\]", Pattern.DOTALL | Pattern.CASE_INSENSITIVE).matcher(message);
+        StringBuffer result = new StringBuffer();
+
+        while (matcher.find()) {
+            matcher.appendReplacement(result, "<img src=\"" + matcher.group(1) + "\" />");
+        }
+
+        matcher.appendTail(result);
+
+        return result.toString();
+    }
+
+    /**
+     * Parses URLs.
+     *
+     * @param message A message to be parsed
+     * @return A string in which all [url]s and [url=...]s have been replaced with their URLs (and description)
+     */
+    static String replaceUrls(String message) {
+
+        Matcher matcher = Pattern.compile("\\[url=(.*?)\\](.*?)\\[/url\\]", Pattern.DOTALL | Pattern.CASE_INSENSITIVE).matcher(message);
+        StringBuffer result = new StringBuffer();
+
+        String format = "<a href=\"%s\">%s</a>";
+
+        while (matcher.find()) {
+            matcher.appendReplacement(result, String.format(format, matcher.group(1).trim(), matcher.group(2)));
+        }
+
+        matcher.appendTail(result);
+
+        message = result.toString();
+
+        matcher = Pattern.compile("\\[url\\](.*?)\\[/url\\]", Pattern.DOTALL | Pattern.CASE_INSENSITIVE).matcher(message);
+        result = new StringBuffer();
+
+        while (matcher.find()) {
+            matcher.appendReplacement(result, String.format(format, matcher.group(1).trim(), matcher.group(1)));
+        }
+
+        matcher.appendTail(result);
+
+        return result.toString();
+
+    }
+
+    static String replaceSmallBig(String message) {
+        Matcher matcher = Pattern.compile("\\[big\\](.*?)\\[/big\\]", Pattern.DOTALL | Pattern.CASE_INSENSITIVE).matcher(message);
+        StringBuffer result = new StringBuffer();
+
+        while (matcher.find()) {
+            matcher.appendReplacement(result, "<big>" + matcher.group(1) + "</big>");
+        }
+
+        matcher.appendTail(result);
+
+        message = result.toString();
+
+        matcher = Pattern.compile("\\[small\\](.*?)\\[/small\\]", Pattern.DOTALL | Pattern.CASE_INSENSITIVE).matcher(message);
+        result = new StringBuffer();
+
+        while (matcher.find()) {
+            matcher.appendReplacement(result, "<small>" + matcher.group(1) + "</small>");
+        }
+
+        matcher.appendTail(result);
+
+        return result.toString();
+    }
+
+    static String replaceBoldItalicsUnderlineDeleted(String message) {
+        Matcher matcher = Pattern.compile("\\[b\\](.*?)\\[/b\\]", Pattern.DOTALL | Pattern.CASE_INSENSITIVE).matcher(message);
+        StringBuffer result = new StringBuffer();
+
+        while (matcher.find()) {
+            matcher.appendReplacement(result, "<b>" + matcher.group(1) + "</b>");
+        }
+
+        matcher.appendTail(result);
+
+        message = result.toString();
+
+        matcher = Pattern.compile("\\[u\\](.*?)\\[/u\\]", Pattern.DOTALL | Pattern.CASE_INSENSITIVE).matcher(message);
+        result = new StringBuffer();
+
+        while (matcher.find()) {
+            matcher.appendReplacement(result, "<u>" + matcher.group(1) + "</u>");
+        }
+
+        matcher.appendTail(result);
+
+        message = result.toString();
+
+        matcher = Pattern.compile("\\[del\\](.*?)\\[/del\\]", Pattern.DOTALL | Pattern.CASE_INSENSITIVE).matcher(message);
+        result = new StringBuffer();
+
+        while (matcher.find()) {
+            matcher.appendReplacement(result, "<strike>" + matcher.group(1) + "</strike>");
+        }
+
+        matcher.appendTail(result);
+
+        message = result.toString();
+
+        matcher = Pattern.compile("\\[i\\](.*?)\\[/i\\]", Pattern.DOTALL | Pattern.CASE_INSENSITIVE).matcher(message);
+        result = new StringBuffer();
+
+        while (matcher.find()) {
+            matcher.appendReplacement(result, "<i>" + matcher.group(1) + "</i>");
+        }
+
+        matcher.appendTail(result);
+
+        return result.toString();
+    }
+
+    class MessageImageLoader implements Html.ImageGetter {
+
+        private final TextView mTextView;
+
+        MessageImageLoader(TextView textView) {
+            this.mTextView = textView;
+        }
+
+        @Override
+        public Drawable getDrawable(String source) {
+            LevelListDrawable drawable = new LevelListDrawable();
+            Drawable empty = ConversationActivity.this.getResources().getDrawable(R.drawable.ic_menu_refresh);
+            drawable.addLevel(0, 0, empty);
+            drawable.setBounds(0, 0, empty.getIntrinsicWidth(), empty.getIntrinsicHeight());
+            new LoadImage().execute(source, drawable, this.mTextView);
+            return drawable;
+        }
+    }
+
+    /**
+     * Thanks to some guy on stackoverflow for this code. You are the boss, man.
+     */
+    class LoadImage extends AsyncTask<Object, Void, Bitmap> {
+
+        private LevelListDrawable mDrawable;
+        private TextView mTextView;
+
+        @Override
+        protected Bitmap doInBackground(Object... params) {
+            String source = (String) params[0];
+            this.mDrawable = (LevelListDrawable) params[1];
+            this.mTextView = (TextView) params[2];
+            Log.d(TAG, "doInBackground source " + source);
+            try {
+                InputStream is = new URL(source).openStream();
+                return BitmapFactory.decodeStream(is);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Bitmap bitmap) {
+            Log.d(TAG, "Fetching drawable " + this.mDrawable);
+            Log.d(TAG, "Fetching bitmap " + bitmap);
+            if (bitmap != null) {
+                BitmapDrawable drawable = new BitmapDrawable(ConversationActivity.this.getResources(), bitmap);
+                this.mDrawable.addLevel(1, 1, drawable);
+                this.mDrawable.setBounds(0, 0, bitmap.getWidth(), bitmap.getHeight());
+                this.mDrawable.setLevel(1);
+            }
+            CharSequence text = this.mTextView.getText();
+            this.mTextView.setText(text);
+        }
     }
 
 }

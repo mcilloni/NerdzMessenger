@@ -6,5 +6,6 @@ package eu.nerdz.app.messenger;
 public class Implementation {
 
     public static final String REVERSE = "reverse.Reverse";
+    public static final String FASTREVERSE = "fastreverse.FastReverse";
 
 }

@@ -14,7 +14,7 @@ repositories {
 
 android {
     compileSdkVersion 18
-    buildToolsVersion '18.0.1'
+    buildToolsVersion '18.1'
 
     defaultConfig {
         minSdkVersion 7
@@ -28,4 +28,5 @@ dependencies {
     compile 'com.android.support:gridlayout-v7:18.0.+'
     compile 'org.apache.commons:commons-lang3:3.0'
     compile files('libs/NerdzApi.jar')
+    compile files('libs/NerdzApiImpl.jar')
 }

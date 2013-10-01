@@ -14,7 +14,7 @@ public class Prefs {
     private static SharedPreferences sSharedPreferences = NerdzMessenger.getAppContext().getSharedPreferences(Prefs.sPrefsFile, Context.MODE_PRIVATE);
 
     public static String getImplementationName() {
-        return Prefs.sSharedPreferences.getString(Prefs.sDefaultImplementation, Implementation.REVERSE);
+        return Prefs.sSharedPreferences.getString(Prefs.sDefaultImplementation, Implementation.FASTREVERSE);
     }
 
     public static boolean setImplementationName(String name) {
