@@ -26,6 +26,7 @@ dependencies {
     compile 'com.android.support:support-v4:18.0.0'
     compile 'com.android.support:appcompat-v7:18.0.+'
     compile 'com.android.support:gridlayout-v7:18.0.+'
+    compile 'com.integralblue:httpresponsecache:1.3'
     compile 'org.apache.commons:commons-lang3:3.0'
     compile files('libs/NerdzApi.jar')
     compile files('libs/NerdzApiImpl.jar')

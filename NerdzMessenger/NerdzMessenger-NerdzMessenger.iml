@@ -75,6 +75,8 @@
     <orderEntry type="library" exported="" name="NerdzApiImpl" level="project" />
     <orderEntry type="library" exported="" name="ComAndroidSupportGridlayoutV71800.aar" level="project" />
     <orderEntry type="library" exported="" name="commons-lang3-3.0" level="project" />
+    <orderEntry type="library" exported="" name="httpresponsecache-1.3" level="project" />
+    <orderEntry type="library" exported="" name="disklrucache-1.2.1" level="project" />
   </component>
 </module>
 

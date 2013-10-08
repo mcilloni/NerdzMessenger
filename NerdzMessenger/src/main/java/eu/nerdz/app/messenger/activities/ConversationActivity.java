@@ -129,10 +129,9 @@ public class ConversationActivity extends ActionBarActivity {
 
         this.mMessageBox = (EditText) this.findViewById(R.id.new_message_text);
         this.mMessageBox.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
-            }
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
@@ -145,9 +144,8 @@ public class ConversationActivity extends ActionBarActivity {
             }
 
             @Override
-            public void afterTextChanged(Editable s) {
+            public void afterTextChanged(Editable s) {}
 
-            }
         });
 
         this.mButton = (Button) this.findViewById(R.id.send_button);
@@ -456,8 +454,8 @@ public class ConversationActivity extends ActionBarActivity {
             return rowView;
         }
 
-        private boolean isValidRow(View rowView) {
-            return rowView != null && !((ViewHolder) rowView.getTag()).hreffed;
+        private boolean isValidRow(View rowView, int position) {
+            return rowView != null && !((ViewHolder) rowView.getTag()).hreffed && position != this.mMessages.size() - 1;
         }
 
         @Override
@@ -467,7 +465,7 @@ public class ConversationActivity extends ActionBarActivity {
 
             ViewHolder tag;
 
-            rowView = this.isValidRow(rowView) ? rowView : this.newRow() ;
+            rowView = this.isValidRow(rowView, position) ? rowView : this.newRow() ;
             tag = (ViewHolder) rowView.getTag();
 
 
@@ -548,7 +546,14 @@ public class ConversationActivity extends ActionBarActivity {
         String format = "<a href=\"%s\">%s</a>";
 
         while (matcher.find()) {
-            matcher.appendReplacement(result, String.format(format, matcher.group(1).trim(), matcher.group(2)));
+
+            String url = matcher.group(1).trim();
+
+            if(!url.startsWith("http://")) {
+                url = "http://" + url;
+            }
+
+            matcher.appendReplacement(result, String.format(format, url, matcher.group(2)));
         }
 
         matcher.appendTail(result);
@@ -559,7 +564,14 @@ public class ConversationActivity extends ActionBarActivity {
         result = new StringBuffer();
 
         while (matcher.find()) {
-            matcher.appendReplacement(result, String.format(format, matcher.group(1).trim(), matcher.group(1)));
+
+            String url = matcher.group(1).trim();
+
+            if(!url.startsWith("http://")) {
+                url = "http://" + url;
+            }
+
+            matcher.appendReplacement(result, String.format(format, url, url));
         }
 
         matcher.appendTail(result);
@@ -568,6 +580,11 @@ public class ConversationActivity extends ActionBarActivity {
 
     }
 
+    /**
+     * Parses [small], [big] tags.
+     * @param message
+     * @return
+     */
     static String replaceSmallBig(String message) {
         Matcher matcher = Pattern.compile("\\[big\\](.*?)\\[/big\\]", Pattern.DOTALL | Pattern.CASE_INSENSITIVE).matcher(message);
         StringBuffer result = new StringBuffer();
