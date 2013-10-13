@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LevelListDrawable;
@@ -23,6 +24,7 @@ import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.text.method.LinkMovementMethod;
 import android.text.util.Linkify;
+import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Pair;
 import android.util.TypedValue;
@@ -33,18 +35,22 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AbsListView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.io.FileNotFoundException;
+import com.integralblue.httpresponsecache.HttpResponseCache;
+
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.DateFormat;
 import java.util.Calendar;
@@ -62,6 +68,7 @@ import eu.nerdz.api.Nerdz;
 import eu.nerdz.api.UserInfo;
 import eu.nerdz.api.messages.Conversation;
 import eu.nerdz.api.messages.Message;
+import eu.nerdz.api.messages.MessageFetcher;
 import eu.nerdz.api.messages.Messenger;
 import eu.nerdz.app.messenger.DieHorriblyError;
 import eu.nerdz.app.messenger.Prefs;
@@ -71,7 +78,7 @@ public class ConversationActivity extends ActionBarActivity {
 
     private final static String TAG = "NdzConvAct";
     UserInfo mUserInfo;
-    Conversation mThisConversation;
+    MessageFetcher mThisConversation;
     LinkedList<Message> mMessages;
     Messenger mMessenger;
 
@@ -79,7 +86,7 @@ public class ConversationActivity extends ActionBarActivity {
     View mConversationFetchView;
     View mConversationLayoutView;
     EditText mMessageBox;
-    Button mButton;
+    Button mButton, mMoreButton;
 
     MessageFetch mMessageFetch;
     ConversationAdapter mConversationAdapter;
@@ -97,9 +104,9 @@ public class ConversationActivity extends ActionBarActivity {
         Intent intent = this.getIntent();
 
         this.mUserInfo = (UserInfo) intent.getSerializableExtra(this.getString(R.string.data_nerdzinfo));
-        this.mThisConversation = (Conversation) intent.getSerializableExtra(this.getString(R.string.selected_item));
+        Conversation thisConversation = (Conversation) intent.getSerializableExtra(this.getString(R.string.selected_item));
 
-        if (this.mUserInfo == null || this.mThisConversation == null) {
+        if (this.mUserInfo == null || thisConversation == null) {
 
             this.shortToast(R.string.wrong_parameters);
 
@@ -113,19 +120,38 @@ public class ConversationActivity extends ActionBarActivity {
             throw new DieHorriblyError(t.getLocalizedMessage());
         }
 
+        this.mThisConversation = this.mMessenger.getConversationHandler().createFetcher(thisConversation);
+
         ActionBar actionBar = this.getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setTitle(this.mThisConversation.getOtherName());
 
+        //We need a layout that wraps the button and compresses when the button is hidden. Android is stupid and this is an horrible workaround for this.
+        FrameLayout headerLayout = new FrameLayout(this);
+        AbsListView.LayoutParams layoutParams = new AbsListView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        headerLayout.setLayoutParams(layoutParams);
+        headerLayout.setForegroundGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL);
+
+        this.mMoreButton = new Button(this);
+        this.mMoreButton.setBackgroundColor(Color.WHITE);
+        this.mMoreButton.setText(this.getString(R.string.more));
+        this.mMoreButton.setTextSize(TypedValue.COMPLEX_UNIT_SP, 35.0F);
+        this.mMoreButton.setVisibility(View.GONE);
+
+        FrameLayout.LayoutParams buttonLayoutParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        this.mMoreButton.setLayoutParams(buttonLayoutParams);
+
+        headerLayout.addView(this.mMoreButton);
+
+        this.mMoreButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ConversationActivity.this.getMessages();
+            }
+        });
+
         this.mConversationFetchView = this.findViewById(R.id.conversation_fetch);
         this.mConversationLayoutView = this.findViewById(R.id.conversation_layout);
-
-        this.mConversationAdapter = new ConversationAdapter(this.mMessages);
-
-        this.mListView = (ListView) this.findViewById(R.id.conversation);
-        this.mListView.setAdapter(this.mConversationAdapter);
-        this.mListView.setTranscriptMode(ListView.TRANSCRIPT_MODE_NORMAL);
-        this.mListView.setStackFromBottom(true);
 
         this.mMessageBox = (EditText) this.findViewById(R.id.new_message_text);
         this.mMessageBox.addTextChangedListener(new TextWatcher() {
@@ -173,8 +199,35 @@ public class ConversationActivity extends ActionBarActivity {
             }
         });
 
+        File httpCacheDir = new File(this.getCacheDir(), "http");
+        long httpCacheSize = 10 * 1024 * 1024; // 10 MiB
+        try {
+            HttpResponseCache.install(httpCacheDir, httpCacheSize);
+        } catch (IOException e) {
+            this.shortToast("Can't initialize image cache. Expect a slower image fetching.");
+        }
+
+        this.mConversationAdapter = new ConversationAdapter(this.mMessages);
+
+        this.mListView = (ListView) this.findViewById(R.id.conversation);
+
+        this.mListView.addHeaderView(headerLayout);
+
+        this.mListView.setAdapter(this.mConversationAdapter);
+        this.mListView.setTranscriptMode(ListView.TRANSCRIPT_MODE_NORMAL);
+        this.mListView.setStackFromBottom(true);
+
         this.getMessages();
 
+    }
+
+    @Override
+    protected void onStop() {
+       HttpResponseCache cache = HttpResponseCache.getInstalled();
+       if (cache != null) {
+           cache.flush();
+       }
+       super.onStop();
     }
 
     @Override
@@ -262,7 +315,7 @@ public class ConversationActivity extends ActionBarActivity {
         if (this.mMessageFetch != null && this.mMessageFetch.getStatus() == AsyncTask.Status.RUNNING) {
             this.mMessageFetch.cancel(true);
         }
-        (this.mMessageFetch = new MessageFetch()).execute(0, 10);
+        (this.mMessageFetch = new MessageFetch()).execute(10);
 
     }
 
@@ -298,11 +351,11 @@ public class ConversationActivity extends ActionBarActivity {
 
         String buffer = (yesterday.get(Calendar.YEAR) == ourDate.get(Calendar.YEAR) &&
                          yesterday.get(Calendar.DAY_OF_YEAR) == ourDate.get(Calendar.DAY_OF_YEAR))
-                        ? context.getString(R.string.yesterday) + ", "
-                        : (now.get(Calendar.YEAR) == ourDate.get(Calendar.YEAR) &&
+                         ? context.getString(R.string.yesterday) + ", "
+                         : (now.get(Calendar.YEAR) == ourDate.get(Calendar.YEAR) &&
                            now.get(Calendar.DAY_OF_YEAR) == ourDate.get(Calendar.DAY_OF_YEAR))
-                          ? ""
-                          : DateFormat.getDateInstance().format(date) + ", ";
+                           ? ""
+                           : DateFormat.getDateInstance().format(date) + ", ";
 
         buffer += DateFormat.getTimeInstance().format(date);
 
@@ -330,7 +383,8 @@ public class ConversationActivity extends ActionBarActivity {
             Log.d(TAG, "doInBackground()");
 
             try {
-                return Pair.create(ConversationActivity.this.mMessenger.getConversationHandler().getMessages(ConversationActivity.this.mThisConversation, params[0], params[1]), null);
+                ConversationActivity.this.mThisConversation.fetch(params[0]);
+                return Pair.create(ConversationActivity.this.mThisConversation.getFetchedMessages(), null);
             } catch (Throwable t) {
                 return Pair.create(null, t);
             }
@@ -369,13 +423,19 @@ public class ConversationActivity extends ActionBarActivity {
 
             ConversationActivity.this.showProgress(false);
 
+            ConversationActivity.this.mMessages.clear();
             ConversationActivity.this.mMessages.addAll(result.first);
+
+            boolean hasMore = ConversationActivity.this.mThisConversation.hasMore();
+            ConversationActivity.this.mMoreButton.setEnabled(hasMore);
+            ConversationActivity.this.mMoreButton.setVisibility(hasMore ? View.VISIBLE : View.GONE);
+
             ConversationActivity.this.mConversationAdapter.notifyDataSetChanged();
 
             //ConversationActivity.this.scrollDownList();
 
-
         }
+
     }
 
 
@@ -689,15 +749,11 @@ public class ConversationActivity extends ActionBarActivity {
             this.mTextView = (TextView) params[2];
             Log.d(TAG, "doInBackground source " + source);
             try {
+                URL imgUrl = new URL(source);
+                HttpURLConnection httpConn = (HttpURLConnection) imgUrl.openConnection();
                 InputStream is = new URL(source).openStream();
                 return BitmapFactory.decodeStream(is);
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            } catch (Exception ignored) {}
             return null;
         }
 

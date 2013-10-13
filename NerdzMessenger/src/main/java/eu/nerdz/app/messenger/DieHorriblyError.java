@@ -20,9 +20,9 @@
 package eu.nerdz.app.messenger;
 
 /**
- * Created by marco on 8/26/13.
+ * This represents a critical bug, that should not exist.
  */
-public class DieHorriblyError extends RuntimeException {
+public class DieHorriblyError extends Error {
 
     public DieHorriblyError(String msg) {
 

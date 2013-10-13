@@ -132,10 +132,11 @@ public class ConversationsListActivity extends ActionBarActivity {
                     @Override
                     public void run(AccountManagerFuture<Boolean> future) {
 
-                        while (true)
+                        while (true) {
                             if (future.isDone()) {
                                 break;
                             }
+                        }
 
                         ConversationsListActivity.this.shortToast(ConversationsListActivity.this.getString(R.string.account_deleted));
 
