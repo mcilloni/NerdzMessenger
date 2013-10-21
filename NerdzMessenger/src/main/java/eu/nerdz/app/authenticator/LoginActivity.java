@@ -9,7 +9,6 @@ import android.animation.AnimatorListenerAdapter;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -32,6 +31,7 @@ import eu.nerdz.api.LoginException;
 import eu.nerdz.api.Nerdz;
 import eu.nerdz.api.UserInfo;
 import eu.nerdz.api.WrongUserInfoTypeException;
+import eu.nerdz.app.Keys;
 import eu.nerdz.app.messenger.Prefs;
 import eu.nerdz.app.messenger.R;
 
@@ -261,7 +261,7 @@ public class LoginActivity extends ActionBarActivity {
             try {
                 Nerdz nerdz = Nerdz.getImplementation(Prefs.getImplementationName());
                 Bundle userData = new Bundle();
-                userData.putString(LoginActivity.this.getString(R.string.data_nerdzinfo), nerdz.serializeToString(userInfo));
+                userData.putString(Keys.NERDZ_INFO, nerdz.serializeToString(userInfo));
                 boolean created = LoginActivity.this.mAccountManager.addAccountExplicitly(account, null, userData);
                 Bundle extras = LoginActivity.this.getIntent().getExtras();
                 
@@ -275,7 +275,7 @@ public class LoginActivity extends ActionBarActivity {
                         Bundle operationResult = new Bundle();
                         operationResult.putString(AccountManager.KEY_ACCOUNT_NAME, userName);
                         operationResult.putString(AccountManager.KEY_ACCOUNT_TYPE, LoginActivity.this.getString(R.string.account_type));
-                        operationResult.putString(LoginActivity.this.getString(R.string.data_nerdzinfo), nerdz.serializeToString(userInfo));
+                        operationResult.putString(Keys.NERDZ_INFO, nerdz.serializeToString(userInfo));
                         response.onResult(operationResult);
                         
                         Log.d(TAG, "showing a Toast...");

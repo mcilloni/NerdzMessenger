@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <!--
   ~ This file is part of NerdzApi-java.
   ~
@@ -17,9 +18,7 @@
   ~     (C) 2013 Marco Cilloni <marco.cilloni@yahoo.com>
   -->
 
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@+id/action_settings"
-        android:title="@string/action_settings"
-        android:orderInCategory="100"
-        android:showAsAction="never" />
-</menu>
+<resources>
+    <string name="to">Scrivi a</string>
+    <string name="cant_send">Il server ha rifiutato il messaggio. Probabilmente l\'antiflood è attivo, o l\'utente destinatario non esiste.</string>
+</resources>

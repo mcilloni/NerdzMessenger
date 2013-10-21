@@ -8,9 +8,8 @@
     <string name="no_conversations"><center><font size="28">No conversations… Yet.</font></center></string>
     <string name="refresh_conversations">Refresh conversations</string>
     <string name="sad_face"><center><font size="200">:(</font></center></string>
-    <string name="selected_item">SelectedItemConversationx85j</string>
     <string name="yesterday">Yesterday</string>
     <string name="you">You</string>
-
+    <string name="new_conversation">New conversation</string>
 
 </resources>

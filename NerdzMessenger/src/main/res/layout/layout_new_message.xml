@@ -17,19 +17,98 @@
   ~     (C) 2013 Marco Cilloni <marco.cilloni@yahoo.com>
   -->
 
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    tools:context=".NewMessageActivity">
+<merge xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/hello_world" />
+    <LinearLayout
+            android:id="@+id/message_send"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:visibility="gone">
 
-</RelativeLayout>
+        <ProgressBar
+                android:id="@+id/message_send_progress"
+                style="?android:attr/progressBarStyleLarge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"/>
+
+        <TextView
+                android:id="@+id/message_send_status_message"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:fontFamily="sans-serif-light"
+                android:text="@string/messages_fetch_message"
+                android:textAppearance="?android:textAppearanceMedium"/>
+    </LinearLayout>
+
+
+    <RelativeLayout
+            android:id="@+id/message_send_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:background="#fff5f5f5">
+
+        <EditText
+                android:id="@+id/send_to"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:hint="@string/to"
+                android:layout_marginTop="2dp"
+                android:inputType="textNoSuggestions"
+                android:layout_alignParentTop="true"
+                />
+
+        <LinearLayout
+                android:id="@+id/send_box"
+                android:layout_alignParentBottom="true"
+                android:layout_below="@id/send_box"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:minHeight="50dp"
+                android:background="#FFFFFF">
+
+            <View
+                    android:id="@+id/separator1"
+                    android:layout_gravity="top"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="#EEEEEE"/>
+
+            <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:orientation="horizontal">
+
+                <EditText
+                        android:id="@+id/new_message_text"
+                        android:hint="@string/message_hint"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_gravity="bottom"
+                        android:inputType="textCapSentences|textMultiLine"
+                        android:textSize="16sp"
+                        android:maxLines="6"
+                        />
+
+                <Button
+                        android:id="@+id/send_button"
+                        android:layout_width="80dp"
+                        android:layout_height="45dp"
+                        android:layout_gravity="center_horizontal"
+                        android:text="@string/lol"
+                        android:textStyle="bold"/>
+            </LinearLayout>
+        </LinearLayout>
+
+    </RelativeLayout>
+
+</merge>

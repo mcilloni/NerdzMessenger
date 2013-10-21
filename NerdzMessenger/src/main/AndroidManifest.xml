@@ -56,6 +56,18 @@
                 android:value=".activities.ConversationsListActivity" />
         </activity>
 
+        <activity
+                android:name="eu.nerdz.app.messenger.activities.NewMessageActivity"
+                android:label="@string/new_conversation"
+                android:parentActivityName=".activities.ConversationsListActivity"
+                android:theme="@style/Theme.AppCompat.Light.DarkActionBar"
+                android:windowSoftInputMode="stateVisible|adjustResize"
+                android:screenOrientation="nosensor">
+            <meta-data
+                    android:name="android.support.PARENT_ACTIVITY"
+                    android:value=".activities.ConversationsListActivity" />
+        </activity>
+
         <service
             android:name="eu.nerdz.app.authenticator.NerdzAuthenticatorService"
             android:exported="false"
@@ -70,10 +82,6 @@
                 android:resource="@xml/authenticator" />
         </service>
 
-        <activity
-            android:name="eu.nerdz.app.messenger.NewMessageActivity"
-            android:label="@string/title_activity_new_message" >
-        </activity>
     </application>
 
 </manifest>

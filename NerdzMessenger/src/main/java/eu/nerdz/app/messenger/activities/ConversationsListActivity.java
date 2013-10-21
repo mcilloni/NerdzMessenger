@@ -9,12 +9,14 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.text.Html;
 import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
@@ -33,7 +35,10 @@ import java.io.Serializable;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 
 import eu.nerdz.api.ContentException;
@@ -43,13 +48,14 @@ import eu.nerdz.api.UserInfo;
 import eu.nerdz.api.messages.Conversation;
 import eu.nerdz.api.messages.ConversationHandler;
 import eu.nerdz.api.messages.Message;
+import eu.nerdz.app.Keys;
 import eu.nerdz.app.messenger.Prefs;
 import eu.nerdz.app.messenger.R;
 
 public class ConversationsListActivity extends ActionBarActivity {
 
-    public static final String TAG = "NdzConvsListAct";
-    ArrayList<Pair<Conversation, Message>> mConversations;
+    private static final String TAG = "NdzConvsListAct";
+    LinkedList<Pair<Conversation, MessageContainer>> mConversations;
     private View mConversationsListLayoutView;
     private View mFetchStatusView;
     private View mNoConversationsMsgView;
@@ -67,7 +73,7 @@ public class ConversationsListActivity extends ActionBarActivity {
 
         this.setContentView(R.layout.layout_conversations_list);
 
-        this.mConversations = new ArrayList<Pair<Conversation, Message>>(20);
+        this.mConversations = new LinkedList<Pair<Conversation, MessageContainer>>();
 
         this.mConversationsListLayoutView = this.findViewById(R.id.conversations_list_layout);
         this.mFetchStatusView = this.findViewById(R.id.fetch_status);
@@ -86,16 +92,16 @@ public class ConversationsListActivity extends ActionBarActivity {
                 Log.d(TAG, "onItemClick()");
 
                 Intent intent = new Intent(ConversationsListActivity.this, ConversationActivity.class);
-                intent.putExtra(ConversationsListActivity.this.getString(R.string.data_nerdzinfo), ConversationsListActivity.this.mUserInfo);
-                intent.putExtra(ConversationsListActivity.this.getString(R.string.selected_item), ConversationsListActivity.this.mConversations.get(position).first);
-                ConversationsListActivity.this.startActivity(intent);
+                intent.putExtra(Keys.NERDZ_INFO, ConversationsListActivity.this.mUserInfo);
+                intent.putExtra(Keys.SELECTED_ITEM, ConversationsListActivity.this.mConversations.get(position).first);
+                ConversationsListActivity.this.startActivityForResult(intent, Keys.MESSAGE);
             }
         });
 
         if (savedInstanceState == null) {
             if (this.mUserInfo == null) {
                 Intent intent = this.getIntent();
-                Serializable serializable = intent.getSerializableExtra(this.getString(R.string.data_nerdzinfo));
+                Serializable serializable = intent.getSerializableExtra(Keys.NERDZ_INFO);
 
                 if (serializable == null || !(serializable instanceof UserInfo)) {
                     this.shortToast(R.string.error_invalid_login);
@@ -105,7 +111,7 @@ public class ConversationsListActivity extends ActionBarActivity {
                 }
             }
         } else {
-            this.mUserInfo = (UserInfo) savedInstanceState.getSerializable(this.getString(R.string.data_nerdzinfo));
+            this.mUserInfo = (UserInfo) savedInstanceState.getSerializable(Keys.NERDZ_INFO);
         }
 
         this.fetchConversations();
@@ -124,7 +130,7 @@ public class ConversationsListActivity extends ActionBarActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
 
         switch (item.getItemId()) {
-            case R.id.delete_account:
+            case R.id.clist_delete_account: {
                 AccountManager am = AccountManager.get(this);
                 Account account = am.getAccountsByType(this.getString(R.string.account_type))[0];
                 am.removeAccount(account, new AccountManagerCallback<Boolean>() {
@@ -147,11 +153,20 @@ public class ConversationsListActivity extends ActionBarActivity {
                     }
                 }, null);
                 return true;
-            case R.id.clist_refresh_button:
+            }
+            case R.id.clist_refresh_button: {
                 this.fetchConversations();
                 return true;
-            default:
+            }
+            case R.id.clist_new_conversation: {
+                Intent intent = new Intent(ConversationsListActivity.this, NewMessageActivity.class);
+                intent.putExtra(Keys.NERDZ_INFO, ConversationsListActivity.this.mUserInfo);
+                ConversationsListActivity.this.startActivityForResult(intent, Keys.MESSAGE);
+                return true;
+            }
+            default: {
                 return super.onOptionsItemSelected(item);
+            }
         }
 
     }
@@ -165,11 +180,23 @@ public class ConversationsListActivity extends ActionBarActivity {
     }
 
     @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        if (requestCode == Keys.MESSAGE) {
+
+            if(resultCode == Activity.RESULT_OK){
+                this.updateListWithMessage((Message) data.getSerializableExtra(Keys.OPERATION_RESULT));
+            }
+
+        }
+    }
+
+    @Override
     public void onSaveInstanceState(Bundle outState) {
 
         Log.d(TAG, "onSaveInstanceState()");
 
-        outState.putSerializable(this.getString(R.string.data_nerdzinfo), this.mUserInfo);
+        outState.putSerializable(Keys.NERDZ_INFO, this.mUserInfo);
         super.onSaveInstanceState(outState);
     }
 
@@ -275,7 +302,7 @@ public class ConversationsListActivity extends ActionBarActivity {
         }
     }
 
-    private class ConversationFetch extends AsyncTask<Void, Void, Pair<ArrayList<Pair<Conversation, Message>>, Throwable>> {
+    private class ConversationFetch extends AsyncTask<Void, Void, Pair<ArrayList<Pair<Conversation, MessageContainer>>, Throwable>> {
 
         private ConversationHandler mHandler;
 
@@ -290,7 +317,7 @@ public class ConversationsListActivity extends ActionBarActivity {
         }
 
         @Override
-        protected Pair<ArrayList<Pair<Conversation, Message>>, Throwable> doInBackground(Void... params) {
+        protected Pair<ArrayList<Pair<Conversation, MessageContainer>>, Throwable> doInBackground(Void... params) {
 
             Log.d(TAG, "doInBackground()");
 
@@ -299,10 +326,10 @@ public class ConversationsListActivity extends ActionBarActivity {
                 if (conversations == null) {
                     return null;
                 }
-                ArrayList<Pair<Conversation, Message>> newList = new ArrayList<Pair<Conversation, Message>>(conversations.size());
+                ArrayList<Pair<Conversation, MessageContainer>> newList = new ArrayList<Pair<Conversation, MessageContainer>>(conversations.size());
                 for (Conversation conversation : conversations) {
                     Message sample = this.mHandler.getLastMessage(conversation);
-                    newList.add(Pair.create(conversation, sample));
+                    newList.add(Pair.create(conversation, new MessageContainer(sample)));
                 }
                 return Pair.create(newList, null);
             } catch (Throwable t) {
@@ -318,7 +345,7 @@ public class ConversationsListActivity extends ActionBarActivity {
         }
 
         @Override
-        protected void onPostExecute(Pair<ArrayList<Pair<Conversation, Message>>, Throwable> result) {
+        protected void onPostExecute(Pair<ArrayList<Pair<Conversation, MessageContainer>>, Throwable> result) {
 
             Log.d(TAG, "onPostExecute()");
 
@@ -373,12 +400,12 @@ public class ConversationsListActivity extends ActionBarActivity {
 
     }
 
-    private class ConversationsListAdapter extends ArrayAdapter<Pair<Conversation, Message>> {
+    private class ConversationsListAdapter extends ArrayAdapter<Pair<Conversation, MessageContainer>> {
 
-        private List<Pair<Conversation, Message>> mConversations;
+        private List<Pair<Conversation, MessageContainer>> mConversations;
         private ActionBarActivity mActivity;
 
-        public ConversationsListAdapter(List<Pair<Conversation, Message>> conversations) {
+        public ConversationsListAdapter(List<Pair<Conversation, MessageContainer>> conversations) {
             super(ConversationsListActivity.this, R.layout.conversation_list_element, conversations);
             this.mConversations = conversations;
             this.mActivity = ConversationsListActivity.this;
@@ -387,7 +414,7 @@ public class ConversationsListActivity extends ActionBarActivity {
         @Override
         public View getView(int position, View rowView, ViewGroup parent) {
 
-            Pair<Conversation, Message> element = this.mConversations.get(position);
+            Pair<Conversation, MessageContainer> element = this.mConversations.get(position);
 
             ViewHolder tag;
 
@@ -412,9 +439,13 @@ public class ConversationsListActivity extends ActionBarActivity {
 
             message = (indexOf > -1) ? message.substring(0, indexOf) : message;
 
-            message = (element.second.getSenderID() != element.first.getOtherID()) ? this.mActivity.getString(R.string.you) + ": " + message : message;
+            int senderId = element.second.received()
+                           ? element.second.thisConversation().getOtherID()
+                           : ConversationsListActivity.this.mUserInfo.getNerdzID();
 
-            tag.message.setText(message);
+            message = (senderId != element.first.getOtherID()) ? this.mActivity.getString(R.string.you) + ": " + message : message;
+
+            tag.message.setText(Html.fromHtml(message));
 
             tag.date.setText(ConversationsListActivity.formatDate(element.first.getLastDate(), this.mActivity) + ' ');
 
@@ -422,6 +453,77 @@ public class ConversationsListActivity extends ActionBarActivity {
         }
 
 
+    }
+
+    /**
+     * Why I need this? Because Android pairs are immutable, and this is definitely a problem.
+     * Not willing to use Apache MutablePairs (with all the problems that mixing the two bring), this is the best solution.
+     */
+    static class MessageContainer implements Message {
+        private Message mMessage;
+
+        public MessageContainer(Message message) {
+            this.mMessage = message;
+        }
+
+        @Override
+        public Conversation thisConversation() {
+            return this.mMessage.thisConversation();
+        }
+
+        @Override
+        public boolean received() {
+            return this.mMessage.received();
+        }
+
+        @Override
+        public boolean read() {
+            return this.mMessage.read();
+        }
+
+        @Override
+        public String getContent() {
+            return this.mMessage.getContent();
+        }
+
+        @Override
+        public Date getDate() {
+            return this.mMessage.getDate();
+        }
+
+        public Message getInnerMessage() {
+            return this.mMessage;
+        }
+
+        public void setInnerMessage(Message message) {
+            this.mMessage = message;
+        }
+    }
+
+    void updateListWithMessage(Message message) {
+        for(Pair<Conversation, MessageContainer> element : this.mConversations) {
+            if (element.first.getOtherID() == message.thisConversation().getOtherID()) {
+                element.first.updateConversation(message);
+                element.second.setInnerMessage(message);
+
+                this.sortConversationList();
+
+                break;
+            }
+        }
+    }
+
+    void sortConversationList() {
+        Collections.sort(this.mConversations, new Comparator<Pair<Conversation, MessageContainer>>() {
+
+            //newer conversations are lesser than older. Yes, that's weird.
+            @Override
+            public int compare(Pair<Conversation, MessageContainer> lhs, Pair<Conversation, MessageContainer> rhs) {
+                return -lhs.first.getLastDate().compareTo(rhs.first.getLastDate());
+            }
+        });
+
+        this.mConversationsListAdapter.notifyDataSetChanged();
     }
 
 }

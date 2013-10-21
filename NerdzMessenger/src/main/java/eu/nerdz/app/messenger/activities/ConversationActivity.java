@@ -4,6 +4,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -24,7 +25,6 @@ import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.text.method.LinkMovementMethod;
 import android.text.util.Linkify;
-import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Pair;
 import android.util.TypedValue;
@@ -70,6 +70,7 @@ import eu.nerdz.api.messages.Conversation;
 import eu.nerdz.api.messages.Message;
 import eu.nerdz.api.messages.MessageFetcher;
 import eu.nerdz.api.messages.Messenger;
+import eu.nerdz.app.Keys;
 import eu.nerdz.app.messenger.DieHorriblyError;
 import eu.nerdz.app.messenger.Prefs;
 import eu.nerdz.app.messenger.R;
@@ -81,6 +82,8 @@ public class ConversationActivity extends ActionBarActivity {
     MessageFetcher mThisConversation;
     LinkedList<Message> mMessages;
     Messenger mMessenger;
+
+    Message mResult;
 
     ListView mListView;
     View mConversationFetchView;
@@ -103,8 +106,8 @@ public class ConversationActivity extends ActionBarActivity {
 
         Intent intent = this.getIntent();
 
-        this.mUserInfo = (UserInfo) intent.getSerializableExtra(this.getString(R.string.data_nerdzinfo));
-        Conversation thisConversation = (Conversation) intent.getSerializableExtra(this.getString(R.string.selected_item));
+        this.mUserInfo = (UserInfo) intent.getSerializableExtra(Keys.NERDZ_INFO);
+        Conversation thisConversation = (Conversation) intent.getSerializableExtra(Keys.SELECTED_ITEM);
 
         if (this.mUserInfo == null || thisConversation == null) {
 
@@ -157,7 +160,8 @@ public class ConversationActivity extends ActionBarActivity {
         this.mMessageBox.addTextChangedListener(new TextWatcher() {
 
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
@@ -170,7 +174,8 @@ public class ConversationActivity extends ActionBarActivity {
             }
 
             @Override
-            public void afterTextChanged(Editable s) {}
+            public void afterTextChanged(Editable s) {
+            }
 
         });
 
@@ -188,7 +193,7 @@ public class ConversationActivity extends ActionBarActivity {
                 }
 
                 try {
-                    ((InputMethodManager) ConversationActivity.this.getSystemService("input_method")).hideSoftInputFromWindow(ConversationActivity.this.getWindow().getCurrentFocus().getWindowToken(), 0);
+                    ((InputMethodManager) ConversationActivity.this.getSystemService(Context.INPUT_METHOD_SERVICE)).hideSoftInputFromWindow(ConversationActivity.this.getWindow().getCurrentFocus().getWindowToken(), 0);
                 } catch (NullPointerException e) {
                 } //Ignore; nobody will get hurt from this.
 
@@ -223,11 +228,31 @@ public class ConversationActivity extends ActionBarActivity {
 
     @Override
     protected void onStop() {
-       HttpResponseCache cache = HttpResponseCache.getInstalled();
-       if (cache != null) {
-           cache.flush();
-       }
-       super.onStop();
+        HttpResponseCache cache = HttpResponseCache.getInstalled();
+        if (cache != null) {
+            cache.flush();
+        }
+        super.onStop();
+    }
+
+    @Override
+    protected void onDestroy() {
+        this.updateExitResult();
+        super.onDestroy();
+    }
+
+    @Override
+    public void onBackPressed() {
+        this.updateExitResult();
+        super.onBackPressed();
+    }
+
+    private void updateExitResult() {
+        Intent resultIntent = new Intent();
+        if (this.mResult != null) {
+            resultIntent.putExtra(Keys.OPERATION_RESULT, this.mResult);
+            this.setResult(Activity.RESULT_OK, resultIntent);
+        }
     }
 
     @Override
@@ -242,6 +267,7 @@ public class ConversationActivity extends ActionBarActivity {
         switch (item.getItemId()) {
             // Respond to the action bar's Up/Home button
             case android.R.id.home:
+                this.updateExitResult();
                 this.finish();
                 return true;
 
@@ -351,11 +377,11 @@ public class ConversationActivity extends ActionBarActivity {
 
         String buffer = (yesterday.get(Calendar.YEAR) == ourDate.get(Calendar.YEAR) &&
                          yesterday.get(Calendar.DAY_OF_YEAR) == ourDate.get(Calendar.DAY_OF_YEAR))
-                         ? context.getString(R.string.yesterday) + ", "
-                         : (now.get(Calendar.YEAR) == ourDate.get(Calendar.YEAR) &&
+                        ? context.getString(R.string.yesterday) + ", "
+                        : (now.get(Calendar.YEAR) == ourDate.get(Calendar.YEAR) &&
                            now.get(Calendar.DAY_OF_YEAR) == ourDate.get(Calendar.DAY_OF_YEAR))
-                           ? ""
-                           : DateFormat.getDateInstance().format(date) + ", ";
+                          ? ""
+                          : DateFormat.getDateInstance().format(date) + ", ";
 
         buffer += DateFormat.getTimeInstance().format(date);
 
@@ -475,11 +501,11 @@ public class ConversationActivity extends ActionBarActivity {
                     ConversationActivity.this.finish();
 
                 }
-
                 return;
 
             }
 
+            ConversationActivity.this.mResult = result.first;
             ConversationActivity.this.mMessages.add(result.first);
             ConversationActivity.this.mConversationAdapter.notifyDataSetChanged();
 
@@ -525,13 +551,17 @@ public class ConversationActivity extends ActionBarActivity {
 
             ViewHolder tag;
 
-            rowView = this.isValidRow(rowView, position) ? rowView : this.newRow() ;
+            rowView = this.isValidRow(rowView, position) ? rowView : this.newRow();
             tag = (ViewHolder) rowView.getTag();
 
 
             RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) tag.message.getLayoutParams();
 
-            if (element.getSenderID() != ConversationActivity.this.mUserInfo.getNerdzID()) {
+            int senderId = element.received()
+                           ? element.thisConversation().getOtherID()
+                           : ConversationActivity.this.mUserInfo.getNerdzID();
+
+            if (senderId != ConversationActivity.this.mUserInfo.getNerdzID()) {
                 tag.date.setGravity(Gravity.LEFT);
                 tag.message.setGravity(Gravity.LEFT);
                 layoutParams.setMargins(0, 0, this.dpToPixels(30), 0);
@@ -609,7 +639,7 @@ public class ConversationActivity extends ActionBarActivity {
 
             String url = matcher.group(1).trim();
 
-            if(!url.startsWith("http://")) {
+            if (!url.startsWith("http://")) {
                 url = "http://" + url;
             }
 
@@ -627,7 +657,7 @@ public class ConversationActivity extends ActionBarActivity {
 
             String url = matcher.group(1).trim();
 
-            if(!url.startsWith("http://")) {
+            if (!url.startsWith("http://")) {
                 url = "http://" + url;
             }
 
@@ -642,6 +672,7 @@ public class ConversationActivity extends ActionBarActivity {
 
     /**
      * Parses [small], [big] tags.
+     *
      * @param message
      * @return
      */
@@ -753,7 +784,8 @@ public class ConversationActivity extends ActionBarActivity {
                 HttpURLConnection httpConn = (HttpURLConnection) imgUrl.openConnection();
                 InputStream is = new URL(source).openStream();
                 return BitmapFactory.decodeStream(is);
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
             return null;
         }
 

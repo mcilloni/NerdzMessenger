@@ -19,6 +19,7 @@ import java.io.IOException;
 import eu.nerdz.api.Nerdz;
 import eu.nerdz.api.UserInfo;
 import eu.nerdz.api.WrongUserInfoTypeException;
+import eu.nerdz.app.Keys;
 import eu.nerdz.app.messenger.Prefs;
 import eu.nerdz.app.messenger.R;
 
@@ -80,7 +81,7 @@ public class SplashScreenActivity extends Activity {
 
                     try {
                         Bundle result = future.getResult();
-                        String userData = result.getString(SplashScreenActivity.this.getString(R.string.data_nerdzinfo));
+                        String userData = result.getString(Keys.NERDZ_INFO);
                         SplashScreenActivity.this.launchConversations(SplashScreenActivity.this.mNerdz.deserializeFromString(userData));
 
                     } catch (OperationCanceledException e) {
@@ -100,7 +101,7 @@ public class SplashScreenActivity extends Activity {
                 }
             }, null);
         } else {
-            String userData = this.mAM.getUserData(accounts[0], this.getString(R.string.data_nerdzinfo));
+            String userData = this.mAM.getUserData(accounts[0], Keys.NERDZ_INFO);
 
             try {
                 SplashScreenActivity.this.launchConversations(SplashScreenActivity.this.mNerdz.deserializeFromString(userData));
@@ -116,7 +117,7 @@ public class SplashScreenActivity extends Activity {
         Log.d(TAG, "userInfo=" + userInfo);
 
         Intent intent = new Intent(SplashScreenActivity.this, ConversationsListActivity.class);
-        intent.putExtra(this.getString(R.string.data_nerdzinfo), userInfo);
+        intent.putExtra(Keys.NERDZ_INFO, userInfo);
         SplashScreenActivity.this.startActivity(intent);
 
     }

@@ -9,5 +9,6 @@
     <string name="refresh_conversations">Aggiorna lista conversazioni</string>
     <string name="yesterday">Ieri</string>
     <string name="you">Tu</string>
+    <string name="new_conversation">Nuova conversazione</string>
 
 </resources>
