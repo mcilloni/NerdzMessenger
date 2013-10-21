@@ -12,6 +12,7 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -93,7 +94,10 @@ public class ConversationsListActivity extends ActionBarActivity {
 
                 Intent intent = new Intent(ConversationsListActivity.this, ConversationActivity.class);
                 intent.putExtra(Keys.NERDZ_INFO, ConversationsListActivity.this.mUserInfo);
-                intent.putExtra(Keys.SELECTED_ITEM, ConversationsListActivity.this.mConversations.get(position).first);
+                Conversation conversation = ConversationsListActivity.this.mConversations.get(position).first;
+                conversation.setHasNewMessages(false);
+                ConversationsListActivity.this.mConversationsListAdapter.notifyDataSetChanged();
+                intent.putExtra(Keys.SELECTED_ITEM, conversation);
                 ConversationsListActivity.this.startActivityForResult(intent, Keys.MESSAGE);
             }
         });
@@ -430,6 +434,8 @@ public class ConversationsListActivity extends ActionBarActivity {
             } else {
                 tag = (ViewHolder) rowView.getTag();
             }
+
+            rowView.setBackgroundColor(element.first.hasNewMessages() ? Color.parseColor("#FFFFED") : Color.WHITE);
 
             tag.userName.setText(element.first.getOtherName());
 

@@ -71,7 +71,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:divider="@drawable/divider"
-                android:dividerHeight="1dp">
+                android:dividerHeight="1dp"
+                android:drawSelectorOnTop="true">
         </ListView>
     </LinearLayout>
 
