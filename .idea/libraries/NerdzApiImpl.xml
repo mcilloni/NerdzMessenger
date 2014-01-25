@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="NerdzApiImpl">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/NerdzMessenger/libs/NerdzApiImpl.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

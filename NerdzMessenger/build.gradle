@@ -17,9 +17,11 @@ android {
     buildToolsVersion '19.0.1'
 
     defaultConfig {
-        minSdkVersion 7
+        minSdkVersion 8
         targetSdkVersion 19
     }
+
+
 }
 
 dependencies {
@@ -31,3 +33,4 @@ dependencies {
     compile files('libs/NerdzApi.jar')
     compile files('libs/NerdzApiImpl.jar')
 }
+
