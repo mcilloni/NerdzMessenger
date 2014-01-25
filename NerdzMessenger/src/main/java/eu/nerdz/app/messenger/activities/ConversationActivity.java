@@ -274,6 +274,7 @@ public class ConversationActivity extends ActionBarActivity {
             case R.id.msgs_refresh_button: {
                 this.mMessages.clear();
                 this.mListView.invalidateViews();
+                this.mThisConversation.reset();
                 this.getMessages();
                 return true;
             }

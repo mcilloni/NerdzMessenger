@@ -437,7 +437,8 @@ public class ConversationsListActivity extends ActionBarActivity {
 
             rowView.setBackgroundColor(element.first.hasNewMessages() ? Color.parseColor("#FFFFED") : Color.WHITE);
 
-            tag.userName.setText(element.first.getOtherName());
+            String otherName = element.first.getOtherName();
+            tag.userName.setText(otherName);
 
             String message = element.second.getContent();
 
@@ -463,7 +464,7 @@ public class ConversationsListActivity extends ActionBarActivity {
 
     /**
      * Why I need this? Because Android pairs are immutable, and this is definitely a problem.
-     * Not willing to use Apache MutablePairs (with all the problems that mixing the two bring), this is the best solution.
+     * Not willing to use Apache MutablePairs (with all the problems from mixing the two), this is the best solution.
      */
     static class MessageContainer implements Message {
         private Message mMessage;

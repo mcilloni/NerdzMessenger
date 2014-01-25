@@ -3,7 +3,6 @@
 
     <string name="account_deleted">Utente eliminato.</string>
     <string name="conversation_list">Conversazioni</string>
-    <string name="delete_account">Elimina utente</string>
     <string name="conversations_fetch_progress">Scarico le conversazioni…</string>
     <string name="no_conversations"><center><font size="24">Nessuna conversazione… Per ora.</font></center></string>
     <string name="refresh_conversations">Aggiorna lista conversazioni</string>
