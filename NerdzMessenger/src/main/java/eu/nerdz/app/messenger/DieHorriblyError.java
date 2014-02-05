@@ -30,4 +30,10 @@ public class DieHorriblyError extends Error {
 
     }
 
+    public DieHorriblyError(Throwable t) {
+
+        super(t);
+
+    }
+
 }

@@ -33,6 +33,7 @@ import eu.nerdz.api.messages.Message;
 import eu.nerdz.api.messages.Messenger;
 import eu.nerdz.app.Keys;
 import eu.nerdz.app.messenger.DieHorriblyError;
+import eu.nerdz.app.messenger.NerdzMessenger;
 import eu.nerdz.app.messenger.Prefs;
 import eu.nerdz.app.messenger.R;
 
@@ -154,6 +155,12 @@ public class NewMessageActivity extends ActionBarActivity {
 
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        NerdzMessenger.checkPlayServices(this);
     }
 
     /**

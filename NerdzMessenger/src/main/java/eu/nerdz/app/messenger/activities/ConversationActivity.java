@@ -72,10 +72,11 @@ import eu.nerdz.api.messages.MessageFetcher;
 import eu.nerdz.api.messages.Messenger;
 import eu.nerdz.app.Keys;
 import eu.nerdz.app.messenger.DieHorriblyError;
+import eu.nerdz.app.messenger.NerdzMessenger;
 import eu.nerdz.app.messenger.Prefs;
 import eu.nerdz.app.messenger.R;
 
-public class ConversationActivity extends ActionBarActivity {
+public class ConversationActivity extends NerdzMessengerActivity {
 
     private final static String TAG = "NdzConvAct";
     UserInfo mUserInfo;
@@ -272,14 +273,17 @@ public class ConversationActivity extends ActionBarActivity {
                 return true;
 
             case R.id.msgs_refresh_button: {
-                this.mMessages.clear();
-                this.mListView.invalidateViews();
-                this.mThisConversation.reset();
-                this.getMessages();
+                this.refresh();
                 return true;
             }
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        NerdzMessenger.checkPlayServices(this);
     }
 
     /*private void scrollDownList() {
@@ -346,24 +350,11 @@ public class ConversationActivity extends ActionBarActivity {
 
     }
 
-    private void shortToast(String msg) {
-
-        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
-    }
-
-    private void shortToast(int id) {
-
-        this.shortToast(this.getString(id));
-    }
-
-    private void longToast(String msg) {
-
-        Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
-    }
-
-    private void longToast(int id) {
-
-        this.longToast(this.getString(id));
+    private void refresh() {
+        this.mMessages.clear();
+        this.mListView.invalidateViews();
+        this.mThisConversation.reset();
+        this.getMessages();
     }
 
     static String formatDate(Date date, Context context) {

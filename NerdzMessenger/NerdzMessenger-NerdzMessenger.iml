@@ -13,6 +13,7 @@
         <option name="RES_FOLDER_RELATIVE_PATH" value="/src/main/res" />
         <option name="RES_FOLDERS_RELATIVE_PATH" value="file://$MODULE_DIR$/src/main/res" />
         <option name="ASSETS_FOLDER_RELATIVE_PATH" value="/src/main/assets" />
+        <option name="UPDATE_PROPERTY_FILES" value="true" />
       </configuration>
     </facet>
     <facet type="android-gradle" name="Android-Gradle">
@@ -75,6 +76,7 @@
     <orderEntry type="library" exported="" name="support-v4-19.0.1" level="project" />
     <orderEntry type="library" exported="" name="commons-lang3-3.0" level="project" />
     <orderEntry type="library" exported="" name="httpresponsecache-1.3" level="project" />
+    <orderEntry type="library" exported="" name="ComGoogleAndroidGmsPlayServices4132.aar" level="project" />
     <orderEntry type="library" exported="" name="ComAndroidSupportAppcompatV71901.aar" level="project" />
     <orderEntry type="library" exported="" name="ComAndroidSupportGridlayoutV71901.aar" level="project" />
     <orderEntry type="library" exported="" name="disklrucache-1.2.1" level="project" />

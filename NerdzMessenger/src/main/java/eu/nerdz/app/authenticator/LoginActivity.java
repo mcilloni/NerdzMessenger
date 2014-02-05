@@ -25,13 +25,20 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.google.android.gms.gcm.GoogleCloudMessaging;
+
+import java.io.IOException;
+
 import eu.nerdz.api.ContentException;
 import eu.nerdz.api.InvalidManagerException;
 import eu.nerdz.api.LoginException;
 import eu.nerdz.api.Nerdz;
 import eu.nerdz.api.UserInfo;
 import eu.nerdz.api.WrongUserInfoTypeException;
+import eu.nerdz.api.messages.Messenger;
 import eu.nerdz.app.Keys;
+import eu.nerdz.app.messenger.NerdzMessenger;
 import eu.nerdz.app.messenger.Prefs;
 import eu.nerdz.app.messenger.R;
 
@@ -208,6 +215,43 @@ public class LoginActivity extends ActionBarActivity {
         }
     }
 
+    private void registerGcmUser(UserInfo userInfo) {
+        new AsyncTask<UserInfo,Void,String>() {
+
+            @Override
+            protected String doInBackground(UserInfo... params) {
+
+                try {
+                    GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(LoginActivity.this);
+
+                    String regId = gcm.register(NerdzMessenger.GCM_SENDER_ID);
+
+                    Log.d(TAG, "Received RegId " + regId);
+
+                    Prefs.setGcmRegId(regId);
+
+                    Nerdz nerdz = Nerdz.getImplementation(Prefs.getImplementationName());
+
+                    nerdz.newMessenger(params[0]).registerForPush("GCM", regId);
+
+                } catch (Throwable ex) {
+                    Log.w(TAG, ex);
+                    return ex.getLocalizedMessage();
+                }
+
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(String msg) {
+                if(msg != null) {
+                    LoginActivity.this.shortToast(msg);
+                }
+            }
+
+        }.execute(userInfo, null, null);
+    }
+
     public class UserLoginTask extends AsyncTask<String, Void, Pair<UserInfo,Throwable>> {
 
         @Override
@@ -218,8 +262,9 @@ public class LoginActivity extends ActionBarActivity {
             try {
 
                 Nerdz nerdz = Nerdz.getImplementation(Prefs.getImplementationName());
+                UserInfo info = nerdz.logAndGetInfo(params[0], params[1]);
 
-                return Pair.create(nerdz.logAndGetInfo(params[0], params[1]), null);
+                return Pair.create(info, null);
             } catch (Throwable t) {
                 return Pair.create(null,t);
             }
@@ -248,6 +293,9 @@ public class LoginActivity extends ActionBarActivity {
                     LoginActivity.this.mPasswordView.requestFocus();
                     return;
                 }
+
+                Log.w(TAG, throwable);
+
                 LoginActivity.this.popUp("OH NOES EXCEPTIONZ!!!!1111!\n" + throwable.getClass() + ": " + throwable.getLocalizedMessage());
                 return;
             }
@@ -282,6 +330,7 @@ public class LoginActivity extends ActionBarActivity {
                         
                         String msg = String.format(LoginActivity.this.getString(R.string.login_successful), userName);
                         LoginActivity.this.shortToast(msg);
+                        LoginActivity.this.registerGcmUser(userInfo);
                     }
                 }
                 

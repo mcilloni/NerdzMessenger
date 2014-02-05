@@ -10,6 +10,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
@@ -50,10 +51,13 @@ import eu.nerdz.api.messages.Conversation;
 import eu.nerdz.api.messages.ConversationHandler;
 import eu.nerdz.api.messages.Message;
 import eu.nerdz.app.Keys;
+import eu.nerdz.app.messenger.GcmIntentService;
+import eu.nerdz.app.messenger.MessagesHolder;
+import eu.nerdz.app.messenger.NerdzMessenger;
 import eu.nerdz.app.messenger.Prefs;
 import eu.nerdz.app.messenger.R;
 
-public class ConversationsListActivity extends ActionBarActivity {
+public class ConversationsListActivity extends NerdzMessengerActivity {
 
     private static final String TAG = "NdzConvsListAct";
     LinkedList<Pair<Conversation, MessageContainer>> mConversations;
@@ -117,6 +121,8 @@ public class ConversationsListActivity extends ActionBarActivity {
         } else {
             this.mUserInfo = (UserInfo) savedInstanceState.getSerializable(Keys.NERDZ_INFO);
         }
+
+        this.unsetNotification();
 
         this.fetchConversations();
 
@@ -193,6 +199,13 @@ public class ConversationsListActivity extends ActionBarActivity {
             }
 
         }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        NerdzMessenger.checkPlayServices(this);
+        this.unsetNotification();
     }
 
     @Override
@@ -285,15 +298,15 @@ public class ConversationsListActivity extends ActionBarActivity {
 
     }
 
-    private void shortToast(int id) {
+    private void unsetNotification() {
 
-        this.shortToast(this.getString(id));
+        NotificationManager notificationManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
+
+        notificationManager.cancel(GcmIntentService.MSG_ID);
+
+        MessagesHolder.cleanUp();
     }
 
-    private void shortToast(String msg) {
-
-        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
-    }
 
     static class ViewHolder {
 

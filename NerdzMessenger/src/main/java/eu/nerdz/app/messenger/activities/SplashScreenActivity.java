@@ -14,16 +14,22 @@ import android.os.Handler;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesUtil;
+
 import java.io.IOException;
 
 import eu.nerdz.api.Nerdz;
 import eu.nerdz.api.UserInfo;
 import eu.nerdz.api.WrongUserInfoTypeException;
 import eu.nerdz.app.Keys;
+import eu.nerdz.app.messenger.NerdzMessenger;
 import eu.nerdz.app.messenger.Prefs;
 import eu.nerdz.app.messenger.R;
 
+
 public class SplashScreenActivity extends Activity {
+
 
     private static final String TAG = "NdzSplashScreenAct";
 
@@ -37,6 +43,10 @@ public class SplashScreenActivity extends Activity {
         Log.i(TAG, "onCreate(" + savedInstanceState + ")");
 
         super.onCreate(savedInstanceState);
+
+        if (!NerdzMessenger.checkPlayServices(this)) {
+            return;
+        }
 
         this.setContentView(R.layout.layout_splash_screen);
 
@@ -59,6 +69,13 @@ public class SplashScreenActivity extends Activity {
             }
         }, 1000L);
     }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        NerdzMessenger.checkPlayServices(this);
+    }
+
 
     private void keepOnLoggingIn() {
 
