@@ -1,7 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <string name="agree">Accetto</string>
     <string name="api_changed">L\'implementazione dell\'API in uso è cambiata. Elimina l\'utente e rifai il login.</string>
+    <string name="conditions">Questo programma è sperimentale, soggetto a frequenti aggiornamenti ed in fase di sviluppo e testing;
+        pertanto può risultare inusabile o fornire un esperienza incompleta ed inaffidabile.<br />
+        Accettando questo messaggio, tu utente finale liberi lo sviluppatore da ogni possibile responsabilità giuridica o nei confronti tuoi e di qualsiasi altro utente del programma;
+        accetti inoltre il fatto che lo sviluppatore non è responsabile per eventuali danni ad apparecchiature o perdite di informazione e che non hai alcun tipo di garanzia: l\'applicazione è fornita COSÌ COM\'È.</string>
+    <string name="conditions_title">Condizioni D\'Uso</string>
+    <string name="disagree">Rifiuto</string>
     <string name="splash_description">Caricamento di NERDZ Messenger, attendi…</string>
     <string name="operation_cancelled">Operatione Annullata.</string>
 

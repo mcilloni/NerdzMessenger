@@ -30,10 +30,9 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.io.IOException;
-import java.io.Serializable;
+import java.security.Key;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -97,30 +96,16 @@ public class ConversationsListActivity extends NerdzMessengerActivity {
                 Log.d(TAG, "onItemClick()");
 
                 Intent intent = new Intent(ConversationsListActivity.this, ConversationActivity.class);
-                intent.putExtra(Keys.NERDZ_INFO, ConversationsListActivity.this.mUserInfo);
                 Conversation conversation = ConversationsListActivity.this.mConversations.get(position).first;
                 conversation.setHasNewMessages(false);
                 ConversationsListActivity.this.mConversationsListAdapter.notifyDataSetChanged();
-                intent.putExtra(Keys.SELECTED_ITEM, conversation);
+                intent.putExtra(Keys.FROM, conversation.getOtherName());
+                intent.putExtra(Keys.FROM_ID, conversation.getOtherID());
                 ConversationsListActivity.this.startActivityForResult(intent, Keys.MESSAGE);
             }
         });
 
-        if (savedInstanceState == null) {
-            if (this.mUserInfo == null) {
-                Intent intent = this.getIntent();
-                Serializable serializable = intent.getSerializableExtra(Keys.NERDZ_INFO);
-
-                if (serializable == null || !(serializable instanceof UserInfo)) {
-                    this.shortToast(R.string.error_invalid_login);
-                    this.finish();
-                } else {
-                    this.mUserInfo = (UserInfo) serializable;
-                }
-            }
-        } else {
-            this.mUserInfo = (UserInfo) savedInstanceState.getSerializable(Keys.NERDZ_INFO);
-        }
+        this.mUserInfo = NerdzMessenger.getUserData();
 
         this.unsetNotification();
 
@@ -194,7 +179,7 @@ public class ConversationsListActivity extends NerdzMessengerActivity {
 
         if (requestCode == Keys.MESSAGE) {
 
-            if(resultCode == Activity.RESULT_OK){
+            if (resultCode == Activity.RESULT_OK) {
                 this.updateListWithMessage((Message) data.getSerializableExtra(Keys.OPERATION_RESULT));
             }
 
@@ -521,7 +506,7 @@ public class ConversationsListActivity extends NerdzMessengerActivity {
     }
 
     void updateListWithMessage(Message message) {
-        for(Pair<Conversation, MessageContainer> element : this.mConversations) {
+        for (Pair<Conversation, MessageContainer> element : this.mConversations) {
             if (element.first.getOtherID() == message.thisConversation().getOtherID()) {
                 element.first.updateConversation(message);
                 element.second.setInnerMessage(message);

@@ -31,6 +31,8 @@ public class Keys {
 
     public static final int MESSAGE = 1;
     public static final int CONVERSATION_PAIR = 2;
+    public static final String FROM = "from";
+    public static final String FROM_ID = "fromId";
     public static final String NERDZ_INFO = "NerdzInfo";
     public static final String SELECTED_ITEM = "SelectedItemConversationx85j";
     public static final String OPERATION_RESULT = "ResultItemZKS";

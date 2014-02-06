@@ -43,7 +43,6 @@ import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.integralblue.httpresponsecache.HttpResponseCache;
 
@@ -52,6 +51,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.security.Key;
 import java.text.DateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -107,15 +107,58 @@ public class ConversationActivity extends NerdzMessengerActivity {
 
         Intent intent = this.getIntent();
 
-        this.mUserInfo = (UserInfo) intent.getSerializableExtra(Keys.NERDZ_INFO);
-        Conversation thisConversation = (Conversation) intent.getSerializableExtra(Keys.SELECTED_ITEM);
+        this.mUserInfo = NerdzMessenger.getUserData();
 
-        if (this.mUserInfo == null || thisConversation == null) {
+        final String from = intent.getStringExtra(Keys.FROM);
+        final int id = intent.getIntExtra(Keys.FROM_ID, -1);
+
+        if (from == null || id < 0) {
 
             this.shortToast(R.string.wrong_parameters);
 
             throw new DieHorriblyError("Wrong parameters for this activity");
         }
+
+        Conversation thisConversation = new Conversation() {
+
+            private Date mDate = new Date();
+            private boolean mNew = true;
+
+            @Override
+            public int getOtherID() {
+                return id;
+            }
+
+            @Override
+            public String getOtherName() {
+                return from;
+            }
+
+            @Override
+            public Date getLastDate() {
+                return this.mDate;
+            }
+
+            @Override
+            public boolean hasNewMessages() {
+                return this.mNew;
+            }
+
+            @Override
+            public void toggleHasNewMessages() {
+                this.mNew = !this.mNew;
+            }
+
+            @Override
+            public void setHasNewMessages(boolean b) {
+                this.mNew = b;
+            }
+
+            @Override
+            public void updateConversation(Message message) {
+                //do nothing
+            }
+        };
 
         try {
             this.mMessenger = Nerdz.getImplementation(Prefs.getImplementationName()).restoreMessenger(ConversationActivity.this.mUserInfo);

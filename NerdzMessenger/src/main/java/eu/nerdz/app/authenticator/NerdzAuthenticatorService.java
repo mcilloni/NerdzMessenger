@@ -16,7 +16,7 @@ public class NerdzAuthenticatorService extends Service {
 
         Log.i(TAG, "onBind(" + intent + ")");
 
-        if (intent.getAction().equals(AccountManager.ACTION_AUTHENTICATOR_INTENT))
+        if (AccountManager.ACTION_AUTHENTICATOR_INTENT.equals(intent.getAction()))
             return this.mNerdzAuthenticator.getIBinder();
 
         return null;

@@ -12,11 +12,16 @@ import eu.nerdz.api.Nerdz;
 public class Prefs {
 
     private static final String sAppVersion = "NerdzMessengerVers";
+    private static final String sConditions = "NerdzMessengerCondsAccepted";
     private static final String sPrefsFile = "NerdzMessengerPrefs";
     private static final String sDefaultImplementation = "DefaultImplementation";
     private static final String sGcmRegId = "NerdzMessengerRegId";
 
     static SharedPreferences sSharedPreferences = NerdzMessenger.getAppContext().getSharedPreferences(Prefs.sPrefsFile, Context.MODE_PRIVATE);
+
+    public static boolean accepted() {
+        return Prefs.sSharedPreferences.getBoolean(Prefs.sConditions, false);
+    }
 
     public static String getImplementationName() {
         return Prefs.sSharedPreferences.getString(Prefs.sDefaultImplementation, Implementation.FASTREVERSE);
@@ -35,6 +40,10 @@ public class Prefs {
         }
 
         return regId;
+    }
+
+    public static boolean setAccepted() {
+        return Prefs.sSharedPreferences.edit().putBoolean(Prefs.sConditions, true).commit();
     }
 
     public static boolean setGcmRegId(String regId) {

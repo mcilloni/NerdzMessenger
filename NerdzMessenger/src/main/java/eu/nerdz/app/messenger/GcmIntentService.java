@@ -28,6 +28,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.TaskStackBuilder;
 import android.text.Html;
 import android.util.Log;
 import android.util.Pair;
@@ -35,7 +36,9 @@ import android.widget.Toast;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
+import eu.nerdz.app.Keys;
 import eu.nerdz.app.messenger.activities.ConversationActivity;
+import eu.nerdz.app.messenger.activities.ConversationsListActivity;
 
 public class GcmIntentService extends IntentService {
 
@@ -100,6 +103,10 @@ public class GcmIntentService extends IntentService {
 
         Log.d(TAG, "" + counter);
 
+        PendingIntent openIntent = null;
+
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+
         if(counter > 1) {
 
             NotificationCompat.InboxStyle style = new NotificationCompat.InboxStyle();
@@ -108,7 +115,7 @@ public class GcmIntentService extends IntentService {
             message = "Swipe to see details";
 
             style.setBigContentTitle(from);
-            style.setSummaryText(MessagesHolder.name());
+            style.setSummaryText(NerdzMessenger.name());
 
             for (Pair<String,String> pair : MessagesHolder.get()) {
                 style.addLine(Html.fromHtml("<b>" + GcmIntentService.ellipsize(pair.first, 20) + "</b> " + pair.second));
@@ -116,9 +123,21 @@ public class GcmIntentService extends IntentService {
 
             builder.setStyle(style);
 
-        }
+            stackBuilder.addParentStack(ConversationsListActivity.class);
+            stackBuilder.addNextIntent(new Intent(this, ConversationsListActivity.class));
+            openIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+        } else {
 
-        PendingIntent openIntent = PendingIntent.getActivity(this, 0, new Intent(this, ConversationActivity.class), 0);
+            stackBuilder.addParentStack(ConversationActivity.class);
+
+            Intent intent = new Intent(this, ConversationActivity.class);
+
+            intent.putExtra(Keys.FROM, from);
+
+            stackBuilder.addNextIntent(intent);
+            openIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        }
 
         builder //Sorry Robertof, no enormous oneliners today
             .setSmallIcon(R.drawable.ic_stat)

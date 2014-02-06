@@ -1,7 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <string name="agree">Agree</string>
     <string name="api_changed">Api implementation changed. Delete this user and relogin.</string>
+    <string name="conditions">This Software is experimental and under heavy development and testing, and therefore may be unusable or unreliable.<br />
+        Agreeing to this prompt, you free the developer of the Software from any legal liability or responsibility towards you and any other user of the software;
+        you also agree to the fact that the developer is not responsible to any damage to equipment or data loss and that you have no warranty of any kind: this application is provided AS-IS.</string>
+    <string name="conditions_title">Usage Conditions</string>
+    <string name="disagree">Disagree</string>
     <string name="splash_description">NERDZ Messenger is loading…</string>
     <string name="operation_cancelled">Operation Cancelled.</string>
 

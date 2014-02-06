@@ -114,18 +114,5 @@ public class MessagesHolder {
         return MessagesHolder.sList;
     }
 
-    public static String name() {
 
-        if (MessagesHolder.sUserName != null) {
-            return MessagesHolder.sUserName;
-        }
-
-        Context context = NerdzMessenger.getAppContext();
-        try {
-            Account[] accounts = AccountManager.get(context).getAccountsByType(context.getString(R.string.account_type));
-            MessagesHolder.sUserName = accounts[0].name;
-            return MessagesHolder.sUserName;
-        } catch (NullPointerException ignore) {}
-        return "";
-    }
 }
