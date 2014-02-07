@@ -1,9 +1,0 @@
-<component name="libraryTable">
-  <library name="Gradle: NerdzApiImpl">
-    <CLASSES>
-      <root url="jar://$PROJECT_DIR$/NerdzMessenger/libs/NerdzApiImpl.jar!/" />
-    </CLASSES>
-    <JAVADOC />
-    <SOURCES />
-  </library>
-</component>

@@ -19,8 +19,13 @@
 
 package eu.nerdz.app.messenger.activities;
 
+import android.app.NotificationManager;
+import android.content.Context;
 import android.support.v7.app.ActionBarActivity;
 import android.widget.Toast;
+
+import eu.nerdz.app.messenger.GcmIntentService;
+import eu.nerdz.app.messenger.MessagesHolder;
 
 public class NerdzMessengerActivity extends ActionBarActivity {
 
@@ -42,6 +47,14 @@ public class NerdzMessengerActivity extends ActionBarActivity {
     protected void shortToast(String msg) {
 
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+    }
+
+    protected void unsetNotification() {
+        NotificationManager notificationManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
+
+        notificationManager.cancel(GcmIntentService.MSG_ID);
+
+        MessagesHolder.cleanUp();
     }
 
 }

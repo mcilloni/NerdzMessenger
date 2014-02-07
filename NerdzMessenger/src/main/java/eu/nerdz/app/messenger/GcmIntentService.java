@@ -19,6 +19,7 @@
 
 package eu.nerdz.app.messenger;
 
+import android.app.ActivityManager;
 import android.app.IntentService;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -29,6 +30,7 @@ import android.os.Bundle;
 import android.os.PowerManager;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
+import android.support.v4.content.LocalBroadcastManager;
 import android.text.Html;
 import android.util.Log;
 import android.util.Pair;
@@ -47,16 +49,41 @@ public class GcmIntentService extends IntentService {
 
     private static String ellipsize(String string, int length) {
 
-        return string.length() > length ? string.substring(0,length) + '…' : string;
+        return string.length() > length ? string.substring(0, length) + '…' : string;
 
     }
+
+    private NotificationManager mNotificationManager;
+    private LocalBroadcastManager mLocalBroadcastManager;
 
     public GcmIntentService() {
         super(TAG);
     }
 
+    public boolean isActivityOpen() {
+        ActivityManager activityManager = (ActivityManager) this.getSystemService(Context.ACTIVITY_SERVICE);
+
+        String name = activityManager.getRunningTasks(1).get(0).topActivity.getClassName();
+
+        return ConversationActivity.class.getCanonicalName().equalsIgnoreCase(name)
+               ||
+               ConversationsListActivity.class.getCanonicalName().equalsIgnoreCase(name);
+
+    }
+
     @Override
     protected void onHandleIntent(Intent intent) {
+
+        Log.d(TAG, "Received message!");
+
+        if (this.mNotificationManager == null) {
+            this.mNotificationManager = (NotificationManager) NerdzMessenger.context.getSystemService(Context.NOTIFICATION_SERVICE);
+        }
+
+        if (this.mLocalBroadcastManager == null) {
+            this.mLocalBroadcastManager = LocalBroadcastManager.getInstance(this);
+        }
+
         Bundle extras = intent.getExtras();
 
         if (extras == null) {
@@ -75,7 +102,7 @@ public class GcmIntentService extends IntentService {
 
             } else {
 
-                this.notifyUser(extras.getString("messageFrom"), extras.getString("messageBody"));
+                this.notifyUser(extras.getString("messageFrom"), Integer.parseInt(extras.getString("messageFromId")), extras.getString("messageBody"));
 
             }
 
@@ -84,9 +111,15 @@ public class GcmIntentService extends IntentService {
         GcmBroadcastReceiver.completeWakefulIntent(intent);
     }
 
-    private synchronized void notifyUser(String from, String message) {
+    private synchronized void notifyUser(String from, int fromId, String message) {
 
-        PowerManager.WakeLock wL = ((PowerManager)getSystemService(POWER_SERVICE)).newWakeLock(PowerManager.FULL_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP, "notifyWl");
+        if (this.isActivityOpen()) {
+            Log.d(TAG, "Activity is open");
+
+            return;
+        }
+
+        PowerManager.WakeLock wL = ((PowerManager) getSystemService(POWER_SERVICE)).newWakeLock(PowerManager.FULL_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP, "notifyWl");
 
         wL.acquire();
 
@@ -94,8 +127,6 @@ public class GcmIntentService extends IntentService {
         message = GcmIntentService.ellipsize(Html.fromHtml(message).toString(), 60);
 
         String ticker = from + ": " + message;
-
-        NotificationManager notificationManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
 
@@ -107,7 +138,7 @@ public class GcmIntentService extends IntentService {
 
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
 
-        if(counter > 1) {
+        if (counter > 1) {
 
             NotificationCompat.InboxStyle style = new NotificationCompat.InboxStyle();
 
@@ -115,9 +146,9 @@ public class GcmIntentService extends IntentService {
             message = "Swipe to see details";
 
             style.setBigContentTitle(from);
-            style.setSummaryText(NerdzMessenger.name());
+            style.setSummaryText(Server.getInstance().getName());
 
-            for (Pair<String,String> pair : MessagesHolder.get()) {
+            for (Pair<String, String> pair : MessagesHolder.get()) {
                 style.addLine(Html.fromHtml("<b>" + GcmIntentService.ellipsize(pair.first, 20) + "</b> " + pair.second));
             }
 
@@ -133,6 +164,7 @@ public class GcmIntentService extends IntentService {
             Intent intent = new Intent(this, ConversationActivity.class);
 
             intent.putExtra(Keys.FROM, from);
+            intent.putExtra(Keys.FROM_ID, fromId);
 
             stackBuilder.addNextIntent(intent);
             openIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -140,16 +172,16 @@ public class GcmIntentService extends IntentService {
         }
 
         builder //Sorry Robertof, no enormous oneliners today
-            .setSmallIcon(R.drawable.ic_stat)
-            .setContentTitle(from)
-            .setContentText(message)
-            .setContentIntent(openIntent)
-            .setDefaults(Notification.DEFAULT_ALL)
-            .setNumber(counter)
-            .setPriority(Notification.PRIORITY_HIGH)
-            .setTicker(ticker);
+                .setSmallIcon(R.drawable.ic_stat)
+                .setContentTitle(from)
+                .setContentText(message)
+                .setContentIntent(openIntent)
+                .setDefaults(Notification.DEFAULT_ALL)
+                .setNumber(counter)
+                .setPriority(Notification.PRIORITY_HIGH)
+                .setTicker(ticker);
 
-        notificationManager.notify(MSG_ID, builder.build());
+        this.mNotificationManager.notify(MSG_ID, builder.build());
 
         wL.release();
 

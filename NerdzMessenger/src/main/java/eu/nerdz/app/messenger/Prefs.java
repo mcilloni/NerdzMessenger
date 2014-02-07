@@ -17,7 +17,7 @@ public class Prefs {
     private static final String sDefaultImplementation = "DefaultImplementation";
     private static final String sGcmRegId = "NerdzMessengerRegId";
 
-    static SharedPreferences sSharedPreferences = NerdzMessenger.getAppContext().getSharedPreferences(Prefs.sPrefsFile, Context.MODE_PRIVATE);
+    static SharedPreferences sSharedPreferences = NerdzMessenger.context.getSharedPreferences(Prefs.sPrefsFile, Context.MODE_PRIVATE);
 
     public static boolean accepted() {
         return Prefs.sSharedPreferences.getBoolean(Prefs.sConditions, false);

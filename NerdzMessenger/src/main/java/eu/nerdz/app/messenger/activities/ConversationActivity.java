@@ -66,6 +66,7 @@ import eu.nerdz.api.HttpException;
 import eu.nerdz.api.InvalidManagerException;
 import eu.nerdz.api.Nerdz;
 import eu.nerdz.api.UserInfo;
+import eu.nerdz.api.WrongUserInfoTypeException;
 import eu.nerdz.api.messages.Conversation;
 import eu.nerdz.api.messages.Message;
 import eu.nerdz.api.messages.MessageFetcher;
@@ -75,14 +76,13 @@ import eu.nerdz.app.messenger.DieHorriblyError;
 import eu.nerdz.app.messenger.NerdzMessenger;
 import eu.nerdz.app.messenger.Prefs;
 import eu.nerdz.app.messenger.R;
+import eu.nerdz.app.messenger.Server;
 
 public class ConversationActivity extends NerdzMessengerActivity {
 
     private final static String TAG = "NdzConvAct";
-    UserInfo mUserInfo;
     MessageFetcher mThisConversation;
     LinkedList<Message> mMessages;
-    Messenger mMessenger;
 
     Message mResult;
 
@@ -103,11 +103,11 @@ public class ConversationActivity extends NerdzMessengerActivity {
         super.onCreate(savedInstanceState);
         this.setContentView(R.layout.layout_conversation);
 
+        this.unsetNotification();
+
         this.mMessages = new LinkedList<Message>();
 
         Intent intent = this.getIntent();
-
-        this.mUserInfo = NerdzMessenger.getUserData();
 
         final String from = intent.getStringExtra(Keys.FROM);
         final int id = intent.getIntExtra(Keys.FROM_ID, -1);
@@ -119,55 +119,12 @@ public class ConversationActivity extends NerdzMessengerActivity {
             throw new DieHorriblyError("Wrong parameters for this activity");
         }
 
-        Conversation thisConversation = new Conversation() {
-
-            private Date mDate = new Date();
-            private boolean mNew = true;
-
-            @Override
-            public int getOtherID() {
-                return id;
-            }
-
-            @Override
-            public String getOtherName() {
-                return from;
-            }
-
-            @Override
-            public Date getLastDate() {
-                return this.mDate;
-            }
-
-            @Override
-            public boolean hasNewMessages() {
-                return this.mNew;
-            }
-
-            @Override
-            public void toggleHasNewMessages() {
-                this.mNew = !this.mNew;
-            }
-
-            @Override
-            public void setHasNewMessages(boolean b) {
-                this.mNew = b;
-            }
-
-            @Override
-            public void updateConversation(Message message) {
-                //do nothing
-            }
-        };
-
         try {
-            this.mMessenger = Nerdz.getImplementation(Prefs.getImplementationName()).restoreMessenger(ConversationActivity.this.mUserInfo);
-        } catch (Throwable t) {
-            this.longToast("Caught an exception in a place where can't be one: " + t.getLocalizedMessage());
-            throw new DieHorriblyError(t.getLocalizedMessage());
+            this.mThisConversation = Server.getInstance().getFetcher(from, id);
+        } catch (Exception e) {
+            this.shortToast("Fatal error: broken API");
+            this.finish();
         }
-
-        this.mThisConversation = this.mMessenger.getConversationHandler().createFetcher(thisConversation);
 
         ActionBar actionBar = this.getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
@@ -505,7 +462,7 @@ public class ConversationActivity extends NerdzMessengerActivity {
         @Override
         protected Pair<Message, Throwable> doInBackground(String... params) {
             try {
-                return Pair.create(ConversationActivity.this.mMessenger.sendMessage(ConversationActivity.this.mThisConversation.getOtherName(), params[0]), null);
+                return Pair.create(Server.getInstance().sendMessage(ConversationActivity.this.mThisConversation.getOtherName(), params[0]), null);
             } catch (Throwable t) {
                 return Pair.create(null, t);
             }
@@ -594,9 +551,9 @@ public class ConversationActivity extends NerdzMessengerActivity {
 
             int senderId = element.received()
                            ? element.thisConversation().getOtherID()
-                           : ConversationActivity.this.mUserInfo.getNerdzID();
+                           : Server.getInstance().getId();
 
-            if (senderId != ConversationActivity.this.mUserInfo.getNerdzID()) {
+            if (senderId != Server.getInstance().getId()) {
                 tag.date.setGravity(Gravity.LEFT);
                 tag.message.setGravity(Gravity.LEFT);
                 layoutParams.setMargins(0, 0, this.dpToPixels(30), 0);

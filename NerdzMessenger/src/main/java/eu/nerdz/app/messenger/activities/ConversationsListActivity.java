@@ -10,7 +10,6 @@ import android.animation.AnimatorListenerAdapter;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
-import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
@@ -32,7 +31,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import java.io.IOException;
-import java.security.Key;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -44,17 +42,12 @@ import java.util.List;
 
 import eu.nerdz.api.ContentException;
 import eu.nerdz.api.HttpException;
-import eu.nerdz.api.Nerdz;
-import eu.nerdz.api.UserInfo;
 import eu.nerdz.api.messages.Conversation;
-import eu.nerdz.api.messages.ConversationHandler;
 import eu.nerdz.api.messages.Message;
 import eu.nerdz.app.Keys;
-import eu.nerdz.app.messenger.GcmIntentService;
-import eu.nerdz.app.messenger.MessagesHolder;
 import eu.nerdz.app.messenger.NerdzMessenger;
-import eu.nerdz.app.messenger.Prefs;
 import eu.nerdz.app.messenger.R;
+import eu.nerdz.app.messenger.Server;
 
 public class ConversationsListActivity extends NerdzMessengerActivity {
 
@@ -65,7 +58,6 @@ public class ConversationsListActivity extends NerdzMessengerActivity {
     private View mNoConversationsMsgView;
     private ConversationsListAdapter mConversationsListAdapter;
     private ConversationFetch mConversationFetch;
-    private UserInfo mUserInfo;
 
     @SuppressWarnings("unchecked")
     @Override
@@ -104,8 +96,6 @@ public class ConversationsListActivity extends NerdzMessengerActivity {
                 ConversationsListActivity.this.startActivityForResult(intent, Keys.MESSAGE);
             }
         });
-
-        this.mUserInfo = NerdzMessenger.getUserData();
 
         this.unsetNotification();
 
@@ -155,7 +145,6 @@ public class ConversationsListActivity extends NerdzMessengerActivity {
             }
             case R.id.clist_new_conversation: {
                 Intent intent = new Intent(ConversationsListActivity.this, NewMessageActivity.class);
-                intent.putExtra(Keys.NERDZ_INFO, ConversationsListActivity.this.mUserInfo);
                 ConversationsListActivity.this.startActivityForResult(intent, Keys.MESSAGE);
                 return true;
             }
@@ -198,7 +187,6 @@ public class ConversationsListActivity extends NerdzMessengerActivity {
 
         Log.d(TAG, "onSaveInstanceState()");
 
-        outState.putSerializable(Keys.NERDZ_INFO, this.mUserInfo);
         super.onSaveInstanceState(outState);
     }
 
@@ -270,7 +258,7 @@ public class ConversationsListActivity extends NerdzMessengerActivity {
         if (this.mConversationFetch != null && this.mConversationFetch.getStatus() == AsyncTask.Status.RUNNING) {
             this.mConversationFetch.cancel(true);
         }
-        (this.mConversationFetch = new ConversationFetch(this.mUserInfo)).execute();
+        (this.mConversationFetch = new ConversationFetch()).execute();
 
     }
 
@@ -281,15 +269,6 @@ public class ConversationsListActivity extends NerdzMessengerActivity {
         ConversationsListActivity.this.showProgress(false);
         this.mConversationsListAdapter.notifyDataSetChanged();
 
-    }
-
-    private void unsetNotification() {
-
-        NotificationManager notificationManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
-
-        notificationManager.cancel(GcmIntentService.MSG_ID);
-
-        MessagesHolder.cleanUp();
     }
 
 
@@ -306,16 +285,7 @@ public class ConversationsListActivity extends NerdzMessengerActivity {
 
     private class ConversationFetch extends AsyncTask<Void, Void, Pair<ArrayList<Pair<Conversation, MessageContainer>>, Throwable>> {
 
-        private ConversationHandler mHandler;
-
-        public ConversationFetch(UserInfo userInfo) {
-
-            try {
-                this.mHandler = Nerdz.getImplementation(Prefs.getImplementationName()).restoreMessenger(userInfo).getConversationHandler();
-            } catch (Exception e) {
-                ConversationsListActivity.this.shortToast(e.getLocalizedMessage());
-                ConversationsListActivity.this.finish();
-            }
+        public ConversationFetch() {
         }
 
         @Override
@@ -324,13 +294,13 @@ public class ConversationsListActivity extends NerdzMessengerActivity {
             Log.d(TAG, "doInBackground()");
 
             try {
-                List<Conversation> conversations = this.mHandler.getConversations();
+                List<Conversation> conversations = Server.getInstance().getConversations();
                 if (conversations == null) {
                     return null;
                 }
                 ArrayList<Pair<Conversation, MessageContainer>> newList = new ArrayList<Pair<Conversation, MessageContainer>>(conversations.size());
                 for (Conversation conversation : conversations) {
-                    Message sample = this.mHandler.getLastMessage(conversation);
+                    Message sample = Server.getInstance().getLastMessage(conversation);
                     newList.add(Pair.create(conversation, new MessageContainer(sample)));
                 }
                 return Pair.create(newList, null);
@@ -446,7 +416,7 @@ public class ConversationsListActivity extends NerdzMessengerActivity {
 
             int senderId = element.second.received()
                            ? element.second.thisConversation().getOtherID()
-                           : ConversationsListActivity.this.mUserInfo.getNerdzID();
+                           : Server.getInstance().getId();
 
             message = (senderId != element.first.getOtherID()) ? this.mActivity.getString(R.string.you) + ": " + message : message;
 

@@ -1,7 +1,6 @@
 
 package eu.nerdz.app.messenger.activities;
 
-import android.accounts.AccountManager;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -12,11 +11,11 @@ import android.os.Handler;
 import android.util.Log;
 import android.widget.Toast;
 
-import eu.nerdz.api.Nerdz;
 import eu.nerdz.api.UserInfo;
 import eu.nerdz.app.messenger.NerdzMessenger;
 import eu.nerdz.app.messenger.Prefs;
 import eu.nerdz.app.messenger.R;
+import eu.nerdz.app.messenger.Server;
 
 
 public class SplashScreenActivity extends Activity {
@@ -66,7 +65,7 @@ public class SplashScreenActivity extends Activity {
 
         Log.i(TAG, "keepOnLoggingIn()");
 
-        NerdzMessenger.userData(this, new NerdzMessenger.AccountAddReaction() {
+        Server.getInstance().userData(this, new Server.AccountAddReaction() {
             @Override
             public void onError(Exception message) {
                 SplashScreenActivity.this.shortToast(message.getLocalizedMessage());

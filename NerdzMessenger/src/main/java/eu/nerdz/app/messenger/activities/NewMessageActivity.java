@@ -36,15 +36,14 @@ import eu.nerdz.app.messenger.DieHorriblyError;
 import eu.nerdz.app.messenger.NerdzMessenger;
 import eu.nerdz.app.messenger.Prefs;
 import eu.nerdz.app.messenger.R;
+import eu.nerdz.app.messenger.Server;
 
 public class NewMessageActivity extends ActionBarActivity {
 
     private static final String TAG = "NdzNewMessAct";
 
-    private UserInfo mUserInfo;
     View mMessageSendView;
     View mMessageSendLayout;
-    Messenger mMessenger;
     EditText mMessageBox, mTo;
     Button mButton;
     Message mResult;
@@ -53,20 +52,6 @@ public class NewMessageActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.setContentView(R.layout.layout_new_message);
-        this.mUserInfo = (UserInfo) this.getIntent().getSerializableExtra(Keys.NERDZ_INFO);
-        if (this.mUserInfo == null) {
-
-            this.shortToast(R.string.wrong_parameters);
-
-            throw new DieHorriblyError("Wrong parameters for this activity");
-        }
-
-        try {
-            this.mMessenger = Nerdz.getImplementation(Prefs.getImplementationName()).restoreMessenger(NewMessageActivity.this.mUserInfo);
-        } catch (Throwable t) {
-            this.longToast("Caught an exception in a place where can't be one: " + t.getLocalizedMessage());
-            throw new DieHorriblyError(t.getLocalizedMessage());
-        }
 
         this.mMessageSendView = this.findViewById(R.id.message_send);
         this.mMessageSendLayout = this.findViewById(R.id.message_send_layout);
@@ -228,7 +213,7 @@ public class NewMessageActivity extends ActionBarActivity {
         @Override
         protected Pair<Message, Throwable> doInBackground(String... params) {
             try {
-                return Pair.create(NewMessageActivity.this.mMessenger.sendMessage(params[0], params[1]), null);
+                return Pair.create(Server.getInstance().sendMessage(params[0], params[1]), null);
             } catch (Throwable t) {
                 return Pair.create(null, t);
             }
