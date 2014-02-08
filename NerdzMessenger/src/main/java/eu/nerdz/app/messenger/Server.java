@@ -30,9 +30,15 @@ import android.os.Bundle;
 import android.util.Log;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import eu.nerdz.api.BadStatusException;
 import eu.nerdz.api.HttpException;
@@ -53,7 +59,7 @@ public class Server {
     public static final String TAG = "NdzServer";
 
     private static Server ourInstance = new Server();
-    private LinkedList<Message> mStash;
+    private Map<Integer,Message> mStash;
     private UserInfo mUserInfo;
     private Messenger mMessenger;
 
@@ -63,7 +69,7 @@ public class Server {
     }
 
     private Server() {
-        this.mStash = new LinkedList<Message>();
+        this.mStash = Collections.synchronizedMap(new TreeMap<Integer, Message>());
     }
     
     private AccountManager mAccountManager;
@@ -183,12 +189,12 @@ public class Server {
     }
 
     public void stashMessage(Message message) {
-        this.mStash.add(message);
+        this.mStash.put(message.thisConversation().getOtherID(), message);
     }
 
-    public List<Message> getStashedMessages() {
-        List<Message> current = this.mStash;
-        this.mStash = new LinkedList<Message>();
+    public synchronized Collection<Message> getStashedMessages() {
+        Collection<Message> current = this.mStash.values();
+        this.mStash = Collections.synchronizedMap(new HashMap<Integer, Message>());
         return current;
     }
 

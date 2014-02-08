@@ -242,7 +242,7 @@ public class NewMessageActivity extends ActionBarActivity {
             }
 
             Intent resultIntent = new Intent();
-            resultIntent.putExtra(Keys.OPERATION_RESULT, result.first);
+            resultIntent.putExtra(Keys.OPERATION_RESULT, ConversationsListActivity.Result.REFRESH);
             NewMessageActivity.this.setResult(Activity.RESULT_OK, resultIntent);
 
             NewMessageActivity.this.finish();

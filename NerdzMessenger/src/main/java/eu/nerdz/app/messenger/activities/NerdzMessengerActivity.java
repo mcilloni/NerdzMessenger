@@ -26,8 +26,16 @@ import android.widget.Toast;
 
 import eu.nerdz.app.messenger.GcmIntentService;
 import eu.nerdz.app.messenger.MessagesHolder;
+import eu.nerdz.app.messenger.NerdzMessenger;
 
 public class NerdzMessengerActivity extends ActionBarActivity {
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        NerdzMessenger.checkPlayServices(this);
+        this.unsetNotification();
+    }
 
     protected void longToast(String msg) {
 

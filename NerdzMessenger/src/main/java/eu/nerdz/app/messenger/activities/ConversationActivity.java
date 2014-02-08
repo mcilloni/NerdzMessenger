@@ -5,8 +5,10 @@ import android.animation.AnimatorListenerAdapter;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -17,6 +19,7 @@ import android.graphics.drawable.LevelListDrawable;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.text.Editable;
@@ -51,7 +54,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.security.Key;
 import java.text.DateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -64,17 +66,13 @@ import eu.nerdz.api.BadStatusException;
 import eu.nerdz.api.ContentException;
 import eu.nerdz.api.HttpException;
 import eu.nerdz.api.InvalidManagerException;
-import eu.nerdz.api.Nerdz;
-import eu.nerdz.api.UserInfo;
-import eu.nerdz.api.WrongUserInfoTypeException;
-import eu.nerdz.api.messages.Conversation;
 import eu.nerdz.api.messages.Message;
 import eu.nerdz.api.messages.MessageFetcher;
-import eu.nerdz.api.messages.Messenger;
 import eu.nerdz.app.Keys;
-import eu.nerdz.app.messenger.DieHorriblyError;
+import eu.nerdz.app.messenger.GcmIntentService;
 import eu.nerdz.app.messenger.NerdzMessenger;
-import eu.nerdz.app.messenger.Prefs;
+import eu.nerdz.app.messenger.activities.ConversationsListActivity.Result;
+import eu.nerdz.app.messenger.DieHorriblyError;
 import eu.nerdz.app.messenger.R;
 import eu.nerdz.app.messenger.Server;
 
@@ -84,7 +82,7 @@ public class ConversationActivity extends NerdzMessengerActivity {
     MessageFetcher mThisConversation;
     LinkedList<Message> mMessages;
 
-    Message mResult;
+    boolean mStashed;
 
     ListView mListView;
     View mConversationFetchView;
@@ -94,6 +92,7 @@ public class ConversationActivity extends NerdzMessengerActivity {
 
     MessageFetch mMessageFetch;
     ConversationAdapter mConversationAdapter;
+    private BroadcastReceiver mReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -228,6 +227,19 @@ public class ConversationActivity extends NerdzMessengerActivity {
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        this.mReceiver = this.newReceiver();
+        LocalBroadcastManager.getInstance(NerdzMessenger.context).registerReceiver(this.mReceiver, new IntentFilter(GcmIntentService.MESSAGE_EVENT));
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        LocalBroadcastManager.getInstance(NerdzMessenger.context).unregisterReceiver(this.mReceiver);
+    }
+
+    @Override
     protected void onStop() {
         HttpResponseCache cache = HttpResponseCache.getInstalled();
         if (cache != null) {
@@ -248,12 +260,34 @@ public class ConversationActivity extends NerdzMessengerActivity {
         super.onBackPressed();
     }
 
+    private BroadcastReceiver newReceiver() {
+
+        return new GcmIntentService.LocalMessageReceiver(new GcmIntentService.Operation() {
+            @Override
+            public void handleMessage(Message message) {
+                if(message.thisConversation().getOtherID() == ConversationActivity.this.mThisConversation.getOtherID()) {
+                    ConversationActivity.this.append(message);
+                    ConversationsListActivity.MessageContainer messageContainer = new ConversationsListActivity.MessageContainer(message);
+                    messageContainer.lockRead(true);
+                    message = messageContainer;
+                }
+
+                Server.getInstance().stashMessage(message);
+                ConversationActivity.this.mStashed = true;
+            }
+        });
+
+    }
+
+    void append(Message message) {
+        this.mMessages.add(message);
+        this.mConversationAdapter.notifyDataSetChanged();
+    }
+
     private void updateExitResult() {
         Intent resultIntent = new Intent();
-        if (this.mResult != null) {
-            resultIntent.putExtra(Keys.OPERATION_RESULT, this.mResult);
-            this.setResult(Activity.RESULT_OK, resultIntent);
-        }
+        resultIntent.putExtra(Keys.OPERATION_RESULT, this.mStashed ? Result.STASH : Result.NONE);
+        this.setResult(Activity.RESULT_OK, resultIntent);
     }
 
     @Override
@@ -278,12 +312,6 @@ public class ConversationActivity extends NerdzMessengerActivity {
             }
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        NerdzMessenger.checkPlayServices(this);
     }
 
     /*private void scrollDownList() {
@@ -497,9 +525,9 @@ public class ConversationActivity extends NerdzMessengerActivity {
 
             }
 
-            ConversationActivity.this.mResult = result.first;
-            ConversationActivity.this.mMessages.add(result.first);
-            ConversationActivity.this.mConversationAdapter.notifyDataSetChanged();
+            ConversationActivity.this.mStashed = true;
+            Server.getInstance().stashMessage(result.first);
+            ConversationActivity.this.append(result.first);
 
             //ConversationActivity.this.scrollDownList();
 

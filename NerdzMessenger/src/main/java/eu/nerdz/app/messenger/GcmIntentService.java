@@ -24,6 +24,7 @@ import android.app.IntentService;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -38,6 +39,10 @@ import android.widget.Toast;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
+import java.util.Date;
+
+import eu.nerdz.api.messages.Conversation;
+import eu.nerdz.api.messages.Message;
 import eu.nerdz.app.Keys;
 import eu.nerdz.app.messenger.activities.ConversationActivity;
 import eu.nerdz.app.messenger.activities.ConversationsListActivity;
@@ -45,6 +50,8 @@ import eu.nerdz.app.messenger.activities.ConversationsListActivity;
 public class GcmIntentService extends IntentService {
 
     private final static String TAG = "NerdzMsgGCMService";
+
+    public final static String MESSAGE_EVENT = "NdzMsgMsgArrived";
     public final static int MSG_ID = 142424;
 
     private static String ellipsize(String string, int length) {
@@ -111,10 +118,94 @@ public class GcmIntentService extends IntentService {
         GcmBroadcastReceiver.completeWakefulIntent(intent);
     }
 
+    private Message makeMessage(final String from, final int fromId, final String message) {
+        return new Message() {
+
+            Date mDate = new Date();
+
+            private Conversation mConversation = new Conversation() {
+
+                boolean mNew = true;
+                Date mDate2 = mDate;
+
+                @Override
+                public int getOtherID() {
+                    return fromId;
+                }
+
+                @Override
+                public String getOtherName() {
+                    return from;
+                }
+
+                @Override
+                public Date getLastDate() {
+                    return this.mDate2;
+                }
+
+                @Override
+                public boolean hasNewMessages() {
+                    return this.mNew;
+                }
+
+                @Override
+                public void toggleHasNewMessages() {
+                    this.mNew = !this.mNew;
+                }
+
+                @Override
+                public void setHasNewMessages(boolean b) {
+                    this.mNew = b;
+                }
+
+                @Override
+                public void updateConversation(Message message) {
+                    this.mDate2 = message.getDate();
+                    this.mNew = message.read();
+                }
+            };
+
+            @Override
+            public Conversation thisConversation() {
+                return this.mConversation;
+            }
+
+            @Override
+            public boolean received() {
+                return true;
+            }
+
+            @Override
+            public boolean read() {
+                return false;
+            }
+
+            @Override
+            public String getContent() {
+                return message;
+            }
+
+            @Override
+            public Date getDate() {
+                return this.mDate;
+            }
+        };
+    }
+
     private synchronized void notifyUser(String from, int fromId, String message) {
+
+        from = Html.fromHtml(from).toString();
+        message = Html.fromHtml(message).toString();
 
         if (this.isActivityOpen()) {
             Log.d(TAG, "Activity is open");
+
+            Message message1 = this.makeMessage(from, fromId, message);
+
+            Intent intent = new Intent(GcmIntentService.MESSAGE_EVENT);
+            intent.putExtra(GcmIntentService.MESSAGE_EVENT, message1);
+
+            this.mLocalBroadcastManager.sendBroadcast(intent);
 
             return;
         }
@@ -123,8 +214,7 @@ public class GcmIntentService extends IntentService {
 
         wL.acquire();
 
-        from = Html.fromHtml(from).toString();
-        message = GcmIntentService.ellipsize(Html.fromHtml(message).toString(), 60);
+        message = GcmIntentService.ellipsize(message, 60);
 
         String ticker = from + ": " + message;
 
@@ -189,6 +279,26 @@ public class GcmIntentService extends IntentService {
 
     private void shortToast(String msg) {
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+    }
+
+    public static class LocalMessageReceiver extends BroadcastReceiver {
+
+        private final Operation mOperation;
+
+        public LocalMessageReceiver(Operation op) {
+            this.mOperation = op;
+        }
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Message message = (Message) intent.getSerializableExtra(GcmIntentService.MESSAGE_EVENT);
+
+            this.mOperation.handleMessage(message);
+        }
+    }
+
+    public static interface Operation {
+        void handleMessage(Message message);
     }
 
 }

@@ -10,12 +10,15 @@ import android.animation.AnimatorListenerAdapter;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBarActivity;
 import android.text.Html;
 import android.util.Log;
@@ -31,6 +34,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -45,6 +49,7 @@ import eu.nerdz.api.HttpException;
 import eu.nerdz.api.messages.Conversation;
 import eu.nerdz.api.messages.Message;
 import eu.nerdz.app.Keys;
+import eu.nerdz.app.messenger.GcmIntentService;
 import eu.nerdz.app.messenger.NerdzMessenger;
 import eu.nerdz.app.messenger.R;
 import eu.nerdz.app.messenger.Server;
@@ -58,6 +63,7 @@ public class ConversationsListActivity extends NerdzMessengerActivity {
     private View mNoConversationsMsgView;
     private ConversationsListAdapter mConversationsListAdapter;
     private ConversationFetch mConversationFetch;
+    private BroadcastReceiver mReceiver;
 
     @SuppressWarnings("unchecked")
     @Override
@@ -164,22 +170,42 @@ public class ConversationsListActivity extends NerdzMessengerActivity {
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        this.mReceiver = this.newReceiver();
+        LocalBroadcastManager.getInstance(NerdzMessenger.context).registerReceiver(this.mReceiver, new IntentFilter(GcmIntentService.MESSAGE_EVENT));
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        LocalBroadcastManager.getInstance(NerdzMessenger.context).unregisterReceiver(this.mReceiver);
+    }
+
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
         if (requestCode == Keys.MESSAGE) {
 
             if (resultCode == Activity.RESULT_OK) {
-                this.updateListWithMessage((Message) data.getSerializableExtra(Keys.OPERATION_RESULT));
+                Result result = (Result) data.getSerializableExtra(Keys.OPERATION_RESULT);
+
+                if (result != null) {
+                    switch (result) {
+                        case REFRESH:
+                            this.fetchConversations();
+                            break;
+                        case STASH:
+                            for(Message message : Server.getInstance().getStashedMessages()) {
+                                this.updateListWithMessage(message);
+                            }
+                            this.sortConversationList();
+                            break;
+                    }
+                }
             }
 
         }
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        NerdzMessenger.checkPlayServices(this);
-        this.unsetNotification();
     }
 
     @Override
@@ -188,6 +214,16 @@ public class ConversationsListActivity extends NerdzMessengerActivity {
         Log.d(TAG, "onSaveInstanceState()");
 
         super.onSaveInstanceState(outState);
+    }
+
+    private BroadcastReceiver newReceiver() {
+        return new GcmIntentService.LocalMessageReceiver(new GcmIntentService.Operation() {
+            @Override
+            public void handleMessage(Message message) {
+                ConversationsListActivity.this.updateListWithMessage(message);
+                ConversationsListActivity.this.sortConversationList();
+            }
+        });
     }
 
     /**
@@ -436,9 +472,12 @@ public class ConversationsListActivity extends NerdzMessengerActivity {
      */
     static class MessageContainer implements Message {
         private Message mMessage;
+        private boolean mRead;
+        private boolean mLocked;
 
         public MessageContainer(Message message) {
             this.mMessage = message;
+            this.mLocked = false;
         }
 
         @Override
@@ -453,7 +492,7 @@ public class ConversationsListActivity extends NerdzMessengerActivity {
 
         @Override
         public boolean read() {
-            return this.mMessage.read();
+            return this.mLocked ? this.mRead : this.mMessage.read();
         }
 
         @Override
@@ -473,6 +512,11 @@ public class ConversationsListActivity extends NerdzMessengerActivity {
         public void setInnerMessage(Message message) {
             this.mMessage = message;
         }
+
+        public void lockRead(boolean value) {
+            this.mRead = value;
+            this.mLocked = true;
+        }
     }
 
     void updateListWithMessage(Message message) {
@@ -480,12 +524,17 @@ public class ConversationsListActivity extends NerdzMessengerActivity {
             if (element.first.getOtherID() == message.thisConversation().getOtherID()) {
                 element.first.updateConversation(message);
                 element.second.setInnerMessage(message);
-
-                this.sortConversationList();
-
-                break;
+                element.first.setHasNewMessages(message.received() && !message.read());
+                return;
             }
         }
+
+        MessageContainer container = (message instanceof MessageContainer)
+                                     ? (MessageContainer) message
+                                     : new MessageContainer(message);
+
+        this.mConversations.add(Pair.create(container.thisConversation(), container));
+
     }
 
     void sortConversationList() {
@@ -499,6 +548,12 @@ public class ConversationsListActivity extends NerdzMessengerActivity {
         });
 
         this.mConversationsListAdapter.notifyDataSetChanged();
+    }
+
+    public static enum Result implements Serializable {
+        STASH,
+        REFRESH,
+        NONE
     }
 
 }
