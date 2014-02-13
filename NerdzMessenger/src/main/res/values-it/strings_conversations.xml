@@ -3,6 +3,7 @@
 <resources>
 
     <string name="wrong_parameters">Parametri errati passati a questa Attività. Impossibile continuare</string>
+    <string name="title_activity_conversation">Conversazione</string>
     <string name="messages_fetch_message">Attendi…</string>
     <string name="message_hint">Scrivi un messaggio</string>
     <string name="send">INVIA</string>

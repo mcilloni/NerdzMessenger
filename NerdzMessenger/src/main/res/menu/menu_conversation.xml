@@ -5,6 +5,6 @@
             android:id="@+id/msgs_refresh_button"
             android:icon="@drawable/ic_menu_refresh"
             android:title="@string/refresh_conversations"
-            nerdzmsg:showAsAction="always"/>
+            nerdzmsg:showAsAction="never"/>
 
 </menu>

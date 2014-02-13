@@ -41,7 +41,7 @@
             android:layout_below="@id/message_spacer"
             android:layout_width="match_parent"
             android:layout_height="16dp"
-            android:textSize="10sp"
+            android:textSize="12sp"
             android:textColor="#ff9d9d9d"/>
 
 </RelativeLayout>

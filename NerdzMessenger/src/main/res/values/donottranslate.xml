@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+
+    <string name="service_name">Nerdz</string>
+    <string name="lol">LOL</string>
+    <string name="delete_account">Logout</string>
+    <string name="sad_face"><center><font size="200">:(</font></center></string>
+    <string name="login_welcome"><center><font size="72">NERDZ</font></center></string>
+
+    <string name="account_type">eu.nerdz.app</string>
+    <string name="app_name">Nerdz Messenger</string>
+
+</resources>

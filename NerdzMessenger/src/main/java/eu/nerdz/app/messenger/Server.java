@@ -26,16 +26,18 @@ import android.accounts.AccountManagerFuture;
 import android.accounts.AuthenticatorException;
 import android.accounts.OperationCanceledException;
 import android.app.Activity;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.SparseArray;
+
+import com.google.android.gms.gcm.GoogleCloudMessaging;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -59,7 +61,7 @@ public class Server {
     public static final String TAG = "NdzServer";
 
     private static Server ourInstance = new Server();
-    private Map<Integer,Message> mStash;
+    private SparseArray<Message> mStash;
     private UserInfo mUserInfo;
     private Messenger mMessenger;
 
@@ -69,12 +71,12 @@ public class Server {
     }
 
     private Server() {
-        this.mStash = Collections.synchronizedMap(new TreeMap<Integer, Message>());
+        this.mStash = new SparseArray<Message>();
     }
     
     private AccountManager mAccountManager;
 
-    private AccountManager getAccountManager() {
+    private synchronized AccountManager getAccountManager() {
         if(this.mAccountManager != null) {
             return this.mAccountManager;
         }
@@ -144,7 +146,7 @@ public class Server {
         UserInfo info = this.getUserData();
         return info.getUsername();
     }
-    private UserInfo getUserData() {
+    private synchronized UserInfo getUserData() {
 
         if(this.mUserInfo != null) {
             return this.mUserInfo;
@@ -174,7 +176,7 @@ public class Server {
         return this.getMessenger().getConversationHandler().getLastMessage(conversation);
     }
 
-    private Messenger getMessenger() throws ClassNotFoundException, InvalidManagerException, InstantiationException, IllegalAccessException, WrongUserInfoTypeException {
+    private synchronized Messenger getMessenger() throws ClassNotFoundException, InvalidManagerException, InstantiationException, IllegalAccessException, WrongUserInfoTypeException {
         if(this.mMessenger != null) {
             return this.mMessenger;
         }
@@ -184,21 +186,58 @@ public class Server {
         return (this.mMessenger = Nerdz.getImplementation(Prefs.getImplementationName()).restoreMessenger(info));
     }
 
+    public void registerGcmUser(final Reaction reaction) {
+        new AsyncTask<Void,Void,String>() {
+
+            @Override
+            protected String doInBackground(Void... params) {
+
+                try {
+                    GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(NerdzMessenger.context);
+
+                    String regId = gcm.register(NerdzMessenger.GCM_SENDER_ID);
+
+                    Log.d(TAG, "Received RegId " + regId);
+
+                    Prefs.setGcmRegId(regId);
+
+                    Messenger messenger = Server.this.getMessenger();
+
+                    messenger.registerForPush("GCM", regId);
+
+                } catch (Throwable ex) {
+                    Log.w(TAG, ex);
+                    return ex.getLocalizedMessage();
+                }
+
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(String msg) {
+                if(msg != null) {
+                    reaction.onError(new Exception(msg));
+                }
+            }
+
+        }.execute();
+    }
+
     public Message sendMessage(String to, String message) throws ClassNotFoundException, WrongUserInfoTypeException, InvalidManagerException, InstantiationException, IllegalAccessException, UserNotFoundException, HttpException, BadStatusException, IOException {
         return this.getMessenger().sendMessage(to, message);
     }
 
-    public void stashMessage(Message message) {
+    public synchronized void stashMessage(Message message) {
         this.mStash.put(message.thisConversation().getOtherID(), message);
     }
 
-    public synchronized Collection<Message> getStashedMessages() {
-        Collection<Message> current = this.mStash.values();
-        this.mStash = Collections.synchronizedMap(new HashMap<Integer, Message>());
+    public synchronized SparseArray<Message> getStashedMessages() {
+        SparseArray<Message> current = this.mStash;
+        this.mStash = new SparseArray<Message>();
         return current;
     }
 
-    public void userData(Activity callingActivity, final AccountAddReaction reaction) {
+    public void userData(Activity callingActivity, final Reaction reaction) {
         Nerdz nerdzJavaIsDumb = null;
         try {
             nerdzJavaIsDumb = Nerdz.getImplementation(Prefs.getImplementationName());
@@ -259,7 +298,7 @@ public class Server {
 
     }
 
-    public static interface AccountAddReaction {
+    public static interface Reaction {
         public abstract void onError(Exception message);
         public abstract void onSuccess(UserInfo userData);
     }

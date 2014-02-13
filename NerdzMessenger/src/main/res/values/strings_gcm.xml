@@ -23,4 +23,7 @@
     <string name="gms_not_found">No Google Play Services found</string>
     <string name="gms_not_found_msg">Nerdz Messenger requires Google Play Services to work.</string>
 
+    <string name="notify_new_messages">%d new messages</string>
+    <string name="notify_swipe">Swipe to see details</string>
+
 </resources>

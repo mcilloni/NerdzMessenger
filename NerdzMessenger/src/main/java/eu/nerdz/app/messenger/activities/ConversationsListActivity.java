@@ -23,11 +23,13 @@ import android.support.v7.app.ActionBarActivity;
 import android.text.Html;
 import android.util.Log;
 import android.util.Pair;
+import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
@@ -46,11 +48,13 @@ import java.util.List;
 
 import eu.nerdz.api.ContentException;
 import eu.nerdz.api.HttpException;
+import eu.nerdz.api.UserInfo;
 import eu.nerdz.api.messages.Conversation;
 import eu.nerdz.api.messages.Message;
 import eu.nerdz.app.Keys;
 import eu.nerdz.app.messenger.GcmIntentService;
 import eu.nerdz.app.messenger.NerdzMessenger;
+import eu.nerdz.app.messenger.Prefs;
 import eu.nerdz.app.messenger.R;
 import eu.nerdz.app.messenger.Server;
 
@@ -59,11 +63,11 @@ public class ConversationsListActivity extends NerdzMessengerActivity {
     private static final String TAG = "NdzConvsListAct";
     LinkedList<Pair<Conversation, MessageContainer>> mConversations;
     private View mConversationsListLayoutView;
-    private View mFetchStatusView;
     private View mNoConversationsMsgView;
     private ConversationsListAdapter mConversationsListAdapter;
     private ConversationFetch mConversationFetch;
     private BroadcastReceiver mReceiver;
+    private boolean mFromValue;
 
     @SuppressWarnings("unchecked")
     @Override
@@ -73,12 +77,26 @@ public class ConversationsListActivity extends NerdzMessengerActivity {
 
         super.onCreate(savedInstanceState);
 
+        this.supportRequestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+
         this.setContentView(R.layout.layout_conversations_list);
+
+        if(!Prefs.isRegisteredGcm()) {
+            Server.getInstance().registerGcmUser(new Server.Reaction() {
+                @Override
+                public void onError(Exception message) {
+                    ConversationsListActivity.this.shortToast(message.getLocalizedMessage());
+                    ConversationsListActivity.this.finish();
+                }
+
+                @Override
+                public void onSuccess(UserInfo userData) {}
+            });
+        }
 
         this.mConversations = new LinkedList<Pair<Conversation, MessageContainer>>();
 
         this.mConversationsListLayoutView = this.findViewById(R.id.conversations_list_layout);
-        this.mFetchStatusView = this.findViewById(R.id.fetch_status);
         this.mNoConversationsMsgView = this.findViewById(R.id.no_conversations_msg);
 
         this.mConversationsListAdapter = new ConversationsListAdapter(this.mConversations);
@@ -99,6 +117,7 @@ public class ConversationsListActivity extends NerdzMessengerActivity {
                 ConversationsListActivity.this.mConversationsListAdapter.notifyDataSetChanged();
                 intent.putExtra(Keys.FROM, conversation.getOtherName());
                 intent.putExtra(Keys.FROM_ID, conversation.getOtherID());
+                ConversationsListActivity.this.mFromValue = true;
                 ConversationsListActivity.this.startActivityForResult(intent, Keys.MESSAGE);
             }
         });
@@ -172,6 +191,12 @@ public class ConversationsListActivity extends NerdzMessengerActivity {
     @Override
     public void onResume() {
         super.onResume();
+
+        if(this.mFromValue) {
+            this.fetchConversations();
+            this.mFromValue = false;
+        }
+
         this.mReceiver = this.newReceiver();
         LocalBroadcastManager.getInstance(NerdzMessenger.context).registerReceiver(this.mReceiver, new IntentFilter(GcmIntentService.MESSAGE_EVENT));
     }
@@ -196,8 +221,12 @@ public class ConversationsListActivity extends NerdzMessengerActivity {
                             this.fetchConversations();
                             break;
                         case STASH:
-                            for(Message message : Server.getInstance().getStashedMessages()) {
-                                this.updateListWithMessage(message);
+
+                            SparseArray<Message> messages = Server.getInstance().getStashedMessages();
+                            int size = messages.size();
+
+                            for(int i = 0; i < size; ++i) {
+                                this.updateListWithMessage(messages.valueAt(i));
                             }
                             this.sortConversationList();
                             break;
@@ -227,63 +256,16 @@ public class ConversationsListActivity extends NerdzMessengerActivity {
     }
 
     /**
-     * Shows the progress UI, or hides it
+     * Show spinning reload or not
      */
     @SuppressLint("Override")
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
     private void showProgress(final boolean show) {
+        this.setSupportProgressBarIndeterminateVisibility(show);
 
-        // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
-        // for very easy animations. If available, use these APIs to fade-in
-        // the progress spinner.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
-            int shortAnimTime = this.getResources().getInteger(android.R.integer.config_shortAnimTime);
+        boolean noConvShow = !show && this.mConversations.size() == 0;
+        this.mNoConversationsMsgView.setVisibility(noConvShow ? View.VISIBLE : View.INVISIBLE);
+        this.mConversationsListLayoutView.setVisibility(noConvShow ? View.INVISIBLE : View.VISIBLE);
 
-            this.mFetchStatusView.setVisibility(View.VISIBLE);
-            this.mFetchStatusView.animate().setDuration(shortAnimTime).alpha(show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
-
-                @SuppressLint("Override")
-                public void onAnimationEnd(Animator animation) {
-
-                    ConversationsListActivity.this.mFetchStatusView.setVisibility(show ? View.VISIBLE : View.GONE);
-                }
-            });
-
-            if (!show) {
-                final View ourView = (this.mConversations == null ? this.mNoConversationsMsgView : this.mConversationsListLayoutView);
-                ourView.setVisibility(View.VISIBLE);
-                ourView.animate().setDuration(shortAnimTime).alpha(1).setListener(new AnimatorListenerAdapter() {
-
-                    @SuppressLint("Override")
-                    public void onAnimationEnd(Animator animation) {
-
-                        ourView.setVisibility(View.VISIBLE);
-                    }
-                });
-            } else {
-                final View ourView = (this.mNoConversationsMsgView.getVisibility() == View.VISIBLE ? this.mNoConversationsMsgView : this.mConversationsListLayoutView);
-                ourView.setVisibility(View.VISIBLE);
-                ourView.animate().setDuration(shortAnimTime).alpha(0).setListener(new AnimatorListenerAdapter() {
-
-                    @SuppressLint("Override")
-                    public void onAnimationEnd(Animator animation) {
-
-                        ourView.setVisibility(View.GONE);
-                    }
-                });
-            }
-        } else {
-            // The ViewPropertyAnimator APIs are not available, so simply show
-            // and hide the relevant UI components.
-            this.mFetchStatusView.setVisibility(show ? View.VISIBLE : View.GONE);
-            if (!show) {
-                final View ourView = (this.mConversations == null ? this.mNoConversationsMsgView : this.mConversationsListLayoutView);
-                ourView.setVisibility(View.VISIBLE);
-            } else {
-                final View ourView = (this.mNoConversationsMsgView.getVisibility() == View.VISIBLE ? this.mNoConversationsMsgView : this.mConversationsListLayoutView);
-                ourView.setVisibility(View.GONE);
-            }
-        }
     }
 
     private void fetchConversations() {

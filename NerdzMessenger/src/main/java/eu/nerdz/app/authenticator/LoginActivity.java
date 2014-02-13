@@ -215,43 +215,6 @@ public class LoginActivity extends ActionBarActivity {
         }
     }
 
-    private void registerGcmUser(UserInfo userInfo) {
-        new AsyncTask<UserInfo,Void,String>() {
-
-            @Override
-            protected String doInBackground(UserInfo... params) {
-
-                try {
-                    GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(LoginActivity.this);
-
-                    String regId = gcm.register(NerdzMessenger.GCM_SENDER_ID);
-
-                    Log.d(TAG, "Received RegId " + regId);
-
-                    Prefs.setGcmRegId(regId);
-
-                    Nerdz nerdz = Nerdz.getImplementation(Prefs.getImplementationName());
-
-                    nerdz.newMessenger(params[0]).registerForPush("GCM", regId);
-
-                } catch (Throwable ex) {
-                    Log.w(TAG, ex);
-                    return ex.getLocalizedMessage();
-                }
-
-                return null;
-            }
-
-            @Override
-            protected void onPostExecute(String msg) {
-                if(msg != null) {
-                    LoginActivity.this.shortToast(msg);
-                }
-            }
-
-        }.execute(userInfo, null, null);
-    }
-
     public class UserLoginTask extends AsyncTask<String, Void, Pair<UserInfo,Throwable>> {
 
         @Override
@@ -330,7 +293,6 @@ public class LoginActivity extends ActionBarActivity {
                         
                         String msg = String.format(LoginActivity.this.getString(R.string.login_successful), userName);
                         LoginActivity.this.shortToast(msg);
-                        LoginActivity.this.registerGcmUser(userInfo);
                     }
                 }
                 

@@ -6,6 +6,5 @@
     <string name="error_invalid_login">Login data is invalid.</string>
     <string name="error_invalid_password">This password is too short</string>
     <string name="login_successful">NERDZ username %s successfully added!</string>
-    <string name="service_name">Nerdz</string>
 
 </resources>

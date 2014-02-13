@@ -42,6 +42,10 @@ public class Prefs {
         return regId;
     }
 
+    public static boolean isRegisteredGcm() {
+        return Prefs.sSharedPreferences.contains(Prefs.sGcmRegId);
+    }
+
     public static boolean setAccepted() {
         return Prefs.sSharedPreferences.edit().putBoolean(Prefs.sConditions, true).commit();
     }

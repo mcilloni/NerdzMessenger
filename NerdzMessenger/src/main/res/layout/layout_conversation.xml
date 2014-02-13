@@ -1,32 +1,5 @@
 <merge xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <LinearLayout
-            android:id="@+id/conversation_fetch"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:gravity="center_horizontal"
-            android:orientation="vertical"
-            android:visibility="gone">
-
-        <ProgressBar
-                android:id="@+id/conversation_progress"
-                style="?android:attr/progressBarStyleLarge"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"/>
-
-        <TextView
-                android:id="@+id/conversation_status_message"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                android:fontFamily="sans-serif-light"
-                android:text="@string/messages_fetch_message"
-                android:textAppearance="?android:textAppearanceMedium"/>
-    </LinearLayout>
-
-
     <RelativeLayout
             android:id="@+id/conversation_layout"
             android:layout_width="match_parent"

@@ -6,16 +6,16 @@
         android:id="@+id/clist_refresh_button"
         android:icon="@drawable/ic_menu_refresh"
         android:title="@string/refresh_conversations"
-        nerdzmsg:showAsAction="always"/>
+        nerdzmsg:showAsAction="never"/>
     <item
         android:id="@+id/clist_new_conversation"
         android:icon="@drawable/ic_menu_msg_compose_holo_dark"
         android:title="@string/new_conversation"
-        nerdzmsg:showAsAction="always" />
+        nerdzmsg:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/clist_delete_account"
         android:icon="@drawable/ic_menu_delete"
-        android:title="@string/delete_account"/>
+        android:title="@string/delete_account" />
 
 </menu>

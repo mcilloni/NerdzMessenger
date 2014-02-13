@@ -5,7 +5,6 @@
     <string name="login_greeting">Sign in with your NERDZ account:</string>
     <string name="login_login">Sign in</string>
     <string name="login_progress_signing_in">Signing in…</string>
-    <string name="login_welcome"><center><font size="72">NERDZ</font></center></string>
     <string name="prompt_password">Password</string>
     <string name="prompt_username">Username</string>
 

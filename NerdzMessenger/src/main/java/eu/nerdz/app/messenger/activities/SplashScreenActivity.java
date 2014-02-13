@@ -1,6 +1,7 @@
 
 package eu.nerdz.app.messenger.activities;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -65,7 +66,7 @@ public class SplashScreenActivity extends Activity {
 
         Log.i(TAG, "keepOnLoggingIn()");
 
-        Server.getInstance().userData(this, new Server.AccountAddReaction() {
+        Server.getInstance().userData(this, new Server.Reaction() {
             @Override
             public void onError(Exception message) {
                 SplashScreenActivity.this.shortToast(message.getLocalizedMessage());
@@ -92,6 +93,7 @@ public class SplashScreenActivity extends Activity {
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
     }
 
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     private void showDialog(final Runnable runnable) {
 
         if(!Prefs.accepted()) {

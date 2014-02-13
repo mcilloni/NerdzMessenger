@@ -19,6 +19,7 @@
 
 package eu.nerdz.app.messenger;
 
+import android.annotation.TargetApi;
 import android.app.ActivityManager;
 import android.app.IntentService;
 import android.app.Notification;
@@ -27,6 +28,7 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.support.v4.app.NotificationCompat;
@@ -192,6 +194,7 @@ public class GcmIntentService extends IntentService {
         };
     }
 
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     private synchronized void notifyUser(String from, int fromId, String message) {
 
         from = Html.fromHtml(from).toString();
@@ -232,8 +235,8 @@ public class GcmIntentService extends IntentService {
 
             NotificationCompat.InboxStyle style = new NotificationCompat.InboxStyle();
 
-            from = counter + " new messages";
-            message = "Swipe to see details";
+            from = String.format(this.getString(R.string.notify_new_messages), counter);
+            message = this.getString(R.string.notify_swipe);
 
             style.setBigContentTitle(from);
             style.setSummaryText(Server.getInstance().getName());
@@ -268,8 +271,11 @@ public class GcmIntentService extends IntentService {
                 .setContentIntent(openIntent)
                 .setDefaults(Notification.DEFAULT_ALL)
                 .setNumber(counter)
-                .setPriority(Notification.PRIORITY_HIGH)
                 .setTicker(ticker);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+            builder.setPriority(Notification.PRIORITY_HIGH);
+        }
 
         this.mNotificationManager.notify(MSG_ID, builder.build());
 

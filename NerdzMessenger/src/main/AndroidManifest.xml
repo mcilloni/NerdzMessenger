@@ -1,12 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="eu.nerdz.app.messenger"
-    android:versionCode="6"
-    android:versionName="0.6-beta" >
-
-    <uses-sdk
-        android:minSdkVersion="9"
-        android:targetSdkVersion="19" />
+    android:versionCode="10"
+    android:versionName="0.6.8-beta" >
 
     <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
@@ -47,16 +43,18 @@
         <activity
             android:name="eu.nerdz.app.messenger.activities.ConversationsListActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
+            android:exported="true"
             android:label="@string/conversation_list"
             android:screenOrientation="nosensor"
-            android:theme="@style/Theme.AppCompat.Light.DarkActionBar" />
+            android:theme="@style/ReasonablySizeSpinnerStyle" />
         <activity
             android:name="eu.nerdz.app.messenger.activities.ConversationActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
+            android:exported="true"
             android:label="@string/title_activity_conversation"
             android:parentActivityName=".activities.ConversationsListActivity"
             android:screenOrientation="nosensor"
-            android:theme="@style/Theme.AppCompat.Light.DarkActionBar"
+            android:theme="@style/ReasonablySizeSpinnerStyle"
             android:windowSoftInputMode="stateHidden|adjustResize" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
