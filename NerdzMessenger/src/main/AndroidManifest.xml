@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="eu.nerdz.app.messenger"
-    android:versionCode="10"
-    android:versionName="0.6.8-beta" >
+    android:versionCode="12"
+    android:versionName="0.7-beta" >
 
     <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
@@ -12,10 +12,11 @@
     <uses-permission android:name="android.permission.USE_CREDENTIALS" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
-
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
-    
-    <permission android:name="eu.nerdz.app.messenger.permission.C2D_MESSAGE" android:protectionLevel="signature" />
+
+    <permission
+        android:name="eu.nerdz.app.messenger.permission.C2D_MESSAGE"
+        android:protectionLevel="signature" />
 
     <application
         android:name="eu.nerdz.app.messenger.NerdzMessenger"
@@ -38,7 +39,7 @@
             android:name="eu.nerdz.app.authenticator.LoginActivity"
             android:label="@string/login_login"
             android:screenOrientation="nosensor"
-            android:theme="@style/Theme.AppCompat.Light.DarkActionBar"
+            android:theme="@android:style/Theme.Holo.Light.DarkActionBar"
             android:windowSoftInputMode="stateHidden|adjustPan" />
         <activity
             android:name="eu.nerdz.app.messenger.activities.ConversationsListActivity"
@@ -52,7 +53,7 @@
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:exported="true"
             android:label="@string/title_activity_conversation"
-            android:parentActivityName=".activities.ConversationsListActivity"
+            android:parentActivityName="eu.nerdz.app.messenger.activities.ConversationsListActivity"
             android:screenOrientation="nosensor"
             android:theme="@style/ReasonablySizeSpinnerStyle"
             android:windowSoftInputMode="stateHidden|adjustResize" >
@@ -60,27 +61,28 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".activities.ConversationsListActivity" />
         </activity>
-
         <activity
-                android:name="eu.nerdz.app.messenger.activities.NewMessageActivity"
-                android:label="@string/new_conversation"
-                android:parentActivityName=".activities.ConversationsListActivity"
-                android:theme="@style/Theme.AppCompat.Light.DarkActionBar"
-                android:windowSoftInputMode="stateVisible|adjustResize"
-                android:screenOrientation="nosensor">
+            android:name="eu.nerdz.app.messenger.activities.NewMessageActivity"
+            android:label="@string/new_conversation"
+            android:parentActivityName="eu.nerdz.app.messenger.activities.ConversationsListActivity"
+            android:screenOrientation="nosensor"
+            android:theme="@android:style/Theme.Holo.Light.DarkActionBar"
+            android:windowSoftInputMode="stateVisible|adjustResize" >
             <meta-data
-                    android:name="android.support.PARENT_ACTIVITY"
-                    android:value=".activities.ConversationsListActivity" />
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activities.ConversationsListActivity" />
         </activity>
 
-        <meta-data android:name="com.google.android.gms.version"
-                   android:value="@integer/google_play_services_version" />
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
 
         <receiver
-                android:name=".GcmBroadcastReceiver"
-                android:permission="com.google.android.c2dm.permission.SEND" >
+            android:name="eu.nerdz.app.messenger.GcmBroadcastReceiver"
+            android:permission="com.google.android.c2dm.permission.SEND" >
             <intent-filter>
                 <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+
                 <category android:name="com.example.gcm" />
             </intent-filter>
         </receiver>
@@ -98,9 +100,12 @@
                 android:name="android.accounts.AccountAuthenticator"
                 android:resource="@xml/authenticator" />
         </service>
+        <service android:name="eu.nerdz.app.messenger.GcmIntentService" />
 
-        <service android:name=".GcmIntentService" />
-
+        <activity
+            android:name="eu.nerdz.app.messenger.activities.SettingsActivity"
+            android:label="@string/settings" >
+        </activity>
     </application>
 
 </manifest>

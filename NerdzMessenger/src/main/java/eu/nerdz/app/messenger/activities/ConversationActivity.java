@@ -1,5 +1,6 @@
 package eu.nerdz.app.messenger.activities;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -15,8 +16,6 @@ import android.graphics.drawable.LevelListDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarActivity;
 import android.text.Editable;
 import android.text.Html;
 import android.text.TextUtils;
@@ -66,6 +65,7 @@ import eu.nerdz.api.messages.MessageFetcher;
 import eu.nerdz.app.Keys;
 import eu.nerdz.app.messenger.GcmIntentService;
 import eu.nerdz.app.messenger.NerdzMessenger;
+import eu.nerdz.app.messenger.Prefs;
 import eu.nerdz.app.messenger.activities.ConversationsListActivity.Result;
 import eu.nerdz.app.messenger.DieHorriblyError;
 import eu.nerdz.app.messenger.R;
@@ -95,7 +95,7 @@ public class ConversationActivity extends NerdzMessengerActivity {
 
         super.onCreate(savedInstanceState);
 
-        this.supportRequestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+        this.requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 
         this.setContentView(R.layout.layout_conversation);
 
@@ -123,7 +123,7 @@ public class ConversationActivity extends NerdzMessengerActivity {
             this.finish();
         }
 
-        ActionBar actionBar = this.getSupportActionBar();
+        ActionBar actionBar = this.getActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setTitle(this.mThisConversation.getOtherName());
 
@@ -163,7 +163,7 @@ public class ConversationActivity extends NerdzMessengerActivity {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if (TextUtils.isEmpty(s)) {
-                    ConversationActivity.this.mButton.setText(R.string.lol);
+                    ConversationActivity.this.mButton.setText(R.string.reply);
                 } else {
                     ConversationActivity.this.mButton.setText(R.string.send);
                 }
@@ -186,7 +186,7 @@ public class ConversationActivity extends NerdzMessengerActivity {
                 String text = ConversationActivity.this.mMessageBox.getText().toString();
 
                 if (TextUtils.isEmpty(text)) {
-                    text = "LOL";
+                    text = Prefs.getQuickResponse();
                 }
 
                 ConversationActivity.this.showProgress(true);
@@ -320,7 +320,7 @@ public class ConversationActivity extends NerdzMessengerActivity {
      * Shows the progress bar or not
      */
     private void showProgress(final boolean show) {
-        this.setSupportProgressBarIndeterminateVisibility(show);
+        this.setProgressBarIndeterminateVisibility(show);
     }
 
     private void getMessages() {
@@ -519,7 +519,7 @@ public class ConversationActivity extends NerdzMessengerActivity {
     private class ConversationAdapter extends ArrayAdapter<Message> {
 
         private List<Message> mMessages;
-        private ActionBarActivity mActivity;
+        private Activity mActivity;
 
         public ConversationAdapter(List<Message> messages) {
             super(ConversationActivity.this, R.layout.conversation_message, messages);
@@ -613,7 +613,9 @@ public class ConversationActivity extends NerdzMessengerActivity {
         StringBuffer result = new StringBuffer();
 
         while (matcher.find()) {
-            matcher.appendReplacement(result, "<img src=\"" + matcher.group(1) + "\" />");
+            if (matcher.groupCount() > 0) {
+                matcher.appendReplacement(result, "<img src=\"" + matcher.group(1) + "\" />");
+            }
         }
 
         matcher.appendTail(result);
@@ -642,7 +644,9 @@ public class ConversationActivity extends NerdzMessengerActivity {
                 url = "http://" + url;
             }
 
-            matcher.appendReplacement(result, String.format(format, url, matcher.group(2)));
+            if(matcher.groupCount() > 1) {
+                matcher.appendReplacement(result, String.format(format, url, matcher.group(2)));
+            }
         }
 
         matcher.appendTail(result);
@@ -680,7 +684,9 @@ public class ConversationActivity extends NerdzMessengerActivity {
         StringBuffer result = new StringBuffer();
 
         while (matcher.find()) {
-            matcher.appendReplacement(result, "<big>" + matcher.group(1) + "</big>");
+            if(matcher.groupCount() > 0) {
+                matcher.appendReplacement(result, "<big>" + matcher.group(1) + "</big>");
+            }
         }
 
         matcher.appendTail(result);
@@ -691,7 +697,9 @@ public class ConversationActivity extends NerdzMessengerActivity {
         result = new StringBuffer();
 
         while (matcher.find()) {
-            matcher.appendReplacement(result, "<small>" + matcher.group(1) + "</small>");
+            if(matcher.groupCount() > 0) {
+                matcher.appendReplacement(result, "<small>" + matcher.group(1) + "</small>");
+            }
         }
 
         matcher.appendTail(result);
@@ -704,7 +712,9 @@ public class ConversationActivity extends NerdzMessengerActivity {
         StringBuffer result = new StringBuffer();
 
         while (matcher.find()) {
-            matcher.appendReplacement(result, "<b>" + matcher.group(1) + "</b>");
+            if(matcher.groupCount() > 0) {
+                matcher.appendReplacement(result, "<b>" + matcher.group(1) + "</b>");
+            }
         }
 
         matcher.appendTail(result);
@@ -715,7 +725,9 @@ public class ConversationActivity extends NerdzMessengerActivity {
         result = new StringBuffer();
 
         while (matcher.find()) {
-            matcher.appendReplacement(result, "<u>" + matcher.group(1) + "</u>");
+            if(matcher.groupCount() > 0) {
+                matcher.appendReplacement(result, "<u>" + matcher.group(1) + "</u>");
+            }
         }
 
         matcher.appendTail(result);
@@ -726,7 +738,9 @@ public class ConversationActivity extends NerdzMessengerActivity {
         result = new StringBuffer();
 
         while (matcher.find()) {
-            matcher.appendReplacement(result, "<strike>" + matcher.group(1) + "</strike>");
+            if(matcher.groupCount() > 0) {
+                matcher.appendReplacement(result, "<strike>" + matcher.group(1) + "</strike>");
+            }
         }
 
         matcher.appendTail(result);
@@ -737,7 +751,9 @@ public class ConversationActivity extends NerdzMessengerActivity {
         result = new StringBuffer();
 
         while (matcher.find()) {
-            matcher.appendReplacement(result, "<i>" + matcher.group(1) + "</i>");
+            if(matcher.groupCount() > 0) {
+                matcher.appendReplacement(result, "<i>" + matcher.group(1) + "</i>");
+            }
         }
 
         matcher.appendTail(result);

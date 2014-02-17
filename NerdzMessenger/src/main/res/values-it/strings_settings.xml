@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+    <string name="pref_header_general">Impostazioni generiche</string>
+    <string name="pref_quick_response">Cambia la risposta rapida</string>
+    <string name="pref_quick_summary">Imposta il messaggio per il tasto di risposta veloce</string>
+    <string name="delete_account_dialog">Vuoi fare logout?</string>
+</resources>

@@ -223,6 +223,38 @@ public class Server {
         }.execute();
     }
 
+    public void unregisterGcmUser(final Reaction reaction) {
+        new AsyncTask<Void,Void,String>() {
+
+            @Override
+            protected String doInBackground(Void... params) {
+
+                try {
+
+                    String regId = Prefs.getGcmRegId();
+
+                    Messenger messenger = Server.this.getMessenger();
+
+                    messenger.unregisterFromPush("GCM", regId);
+
+                } catch (Throwable ex) {
+                    Log.w(TAG, ex);
+                    return ex.getLocalizedMessage();
+                }
+
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(String msg) {
+                if(msg != null) {
+                    reaction.onError(new Exception(msg));
+                }
+            }
+
+        }.execute();
+    }
+
     public Message sendMessage(String to, String message) throws ClassNotFoundException, WrongUserInfoTypeException, InvalidManagerException, InstantiationException, IllegalAccessException, UserNotFoundException, HttpException, BadStatusException, IOException {
         return this.getMessenger().sendMessage(to, message);
     }

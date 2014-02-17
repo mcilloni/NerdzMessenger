@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:nerdzmsg="http://schemas.android.com/apk/res-auto" >
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
 
     <item
         android:id="@+id/clist_refresh_button"
         android:icon="@drawable/ic_menu_refresh"
         android:title="@string/refresh_conversations"
-        nerdzmsg:showAsAction="never"/>
+        android:showAsAction="never"/>
     <item
         android:id="@+id/clist_new_conversation"
         android:icon="@drawable/ic_menu_msg_compose_holo_dark"
         android:title="@string/new_conversation"
-        nerdzmsg:showAsAction="ifRoom" />
+        android:showAsAction="ifRoom" />
 
     <item
-        android:id="@+id/clist_delete_account"
-        android:icon="@drawable/ic_menu_delete"
-        android:title="@string/delete_account" />
+        android:id="@+id/clist_launch_settings"
+        android:icon="@drawable/ic_menu_preferences"
+        android:title="@string/settings"
+        android:showAsAction="never" />
 
 </menu>

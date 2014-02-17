@@ -81,9 +81,6 @@ public class SplashScreenActivity extends Activity {
     }
 
     private void launchConversations(UserInfo userInfo) {
-
-        Log.d(TAG, "userInfo=" + userInfo);
-
         Intent intent = new Intent(SplashScreenActivity.this, ConversationsListActivity.class);
         SplashScreenActivity.this.startActivity(intent);
 

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory
+            android:title="@string/pref_header_general"
+            android:key="NerdzMessengerPrefs">
+        <EditTextPreference
+            android:title="@string/pref_quick_response"
+            android:key="NerdzMessengerQuickResp"
+            android:summary="@string/pref_quick_summary"
+            android:defaultValue="@string/lol" />
+        <eu.nerdz.app.messenger.LogoutDialog
+            android:title="@string/delete_account"
+            android:dialogMessage="@string/delete_account_dialog"/>
+
+    </PreferenceCategory>
+</PreferenceScreen>

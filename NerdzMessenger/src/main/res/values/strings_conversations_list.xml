@@ -9,5 +9,6 @@
     <string name="yesterday">Yesterday</string>
     <string name="you">You</string>
     <string name="new_conversation">New conversation</string>
+    <string name="settings">Settings</string>
 
 </resources>

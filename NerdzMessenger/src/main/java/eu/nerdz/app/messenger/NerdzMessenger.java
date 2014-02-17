@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
@@ -86,6 +87,15 @@ public class NerdzMessenger extends Application {
 
     }
 
+    protected static void shortToast(int id) {
+
+        NerdzMessenger.shortToast(NerdzMessenger.context.getString(id));
+    }
+
+    protected static void shortToast(String msg) {
+
+        Toast.makeText(NerdzMessenger.context, msg, Toast.LENGTH_SHORT).show();
+    }
 
 }
 

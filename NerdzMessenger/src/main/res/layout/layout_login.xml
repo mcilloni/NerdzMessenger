@@ -46,7 +46,7 @@
                     android:textAppearance="?android:textAppearanceLarge"
                     android:textStyle="bold"/>
 
-            <android.support.v7.widget.Space
+            <Space
                     android:layout_width="match_parent"
                     android:layout_height="29dp"/>
 

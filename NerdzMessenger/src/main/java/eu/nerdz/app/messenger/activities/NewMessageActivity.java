@@ -10,7 +10,6 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -38,7 +37,7 @@ import eu.nerdz.app.messenger.Prefs;
 import eu.nerdz.app.messenger.R;
 import eu.nerdz.app.messenger.Server;
 
-public class NewMessageActivity extends ActionBarActivity {
+public class NewMessageActivity extends Activity {
 
     private static final String TAG = "NdzNewMessAct";
 
@@ -107,7 +106,7 @@ public class NewMessageActivity extends ActionBarActivity {
                 String text = NewMessageActivity.this.mMessageBox.getText().toString();
 
                 if (TextUtils.isEmpty(text)) {
-                    text = "LOL";
+                    text = Prefs.getQuickResponse();
                 }
 
                 try {
@@ -152,42 +151,31 @@ public class NewMessageActivity extends ActionBarActivity {
      * Shows the progress UI, or hides it
      */
     @SuppressLint("Override")
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
     private void showProgress(final boolean show) {
 
-        // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
-        // for very easy animations. If available, use these APIs to fade-in
-        // the progress spinner.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
-            int shortAnimTime = this.getResources().getInteger(android.R.integer.config_shortAnimTime);
+        int shortAnimTime = this.getResources().getInteger(android.R.integer.config_shortAnimTime);
 
-            this.mMessageSendView.setVisibility(View.VISIBLE);
-            this.mMessageSendView.animate().setDuration(shortAnimTime).alpha(show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
+        this.mMessageSendView.setVisibility(View.VISIBLE);
+        this.mMessageSendView.animate().setDuration(shortAnimTime).alpha(show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
 
-                @SuppressLint("Override")
-                public void onAnimationEnd(Animator animation) {
+            @SuppressLint("Override")
+            public void onAnimationEnd(Animator animation) {
 
-                    NewMessageActivity.this.mMessageSendView.setVisibility(show ? View.VISIBLE : View.GONE);
-                }
-            });
+                NewMessageActivity.this.mMessageSendView.setVisibility(show ? View.VISIBLE : View.GONE);
+            }
+        });
 
 
-            this.mMessageSendLayout.setVisibility(View.VISIBLE);
-            this.mMessageSendLayout.animate().setDuration(shortAnimTime).alpha(show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
+        this.mMessageSendLayout.setVisibility(View.VISIBLE);
+        this.mMessageSendLayout.animate().setDuration(shortAnimTime).alpha(show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
 
-                @SuppressLint("Override")
-                public void onAnimationEnd(Animator animation) {
+            @SuppressLint("Override")
+            public void onAnimationEnd(Animator animation) {
 
-                    NewMessageActivity.this.mMessageSendLayout.setVisibility(show ? View.GONE : View.VISIBLE);
-                }
-            });
+                NewMessageActivity.this.mMessageSendLayout.setVisibility(show ? View.GONE : View.VISIBLE);
+            }
+        });
 
-        } else {
-            // The ViewPropertyAnimator APIs are not available, so simply show
-            // and hide the relevant UI components.
-            this.mMessageSendView.setVisibility(show ? View.VISIBLE : View.GONE);
-            this.mMessageSendLayout.setVisibility(show ? View.GONE : View.VISIBLE);
-        }
     }
 
     private void shortToast(String msg) {

@@ -48,7 +48,7 @@
             android:textSize="13sp"
             android:textStyle="italic"/>
 
-    <android.support.v7.widget.Space
+    <Space
             android:id="@+id/spacer_field"
             android:layout_below="@id/user_name_field"
             android:layout_height="8dp"

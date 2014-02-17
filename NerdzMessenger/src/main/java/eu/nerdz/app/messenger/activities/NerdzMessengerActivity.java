@@ -19,16 +19,16 @@
 
 package eu.nerdz.app.messenger.activities;
 
+import android.app.Activity;
 import android.app.NotificationManager;
 import android.content.Context;
-import android.support.v7.app.ActionBarActivity;
 import android.widget.Toast;
 
 import eu.nerdz.app.messenger.GcmIntentService;
 import eu.nerdz.app.messenger.MessagesHolder;
 import eu.nerdz.app.messenger.NerdzMessenger;
 
-public class NerdzMessengerActivity extends ActionBarActivity {
+public class NerdzMessengerActivity extends Activity {
 
     @Override
     public void onResume() {

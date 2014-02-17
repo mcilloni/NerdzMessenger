@@ -2,7 +2,9 @@ package eu.nerdz.app.messenger;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.text.TextUtils;
+import android.util.Log;
 
 import eu.nerdz.api.Nerdz;
 
@@ -13,11 +15,13 @@ public class Prefs {
 
     private static final String sAppVersion = "NerdzMessengerVers";
     private static final String sConditions = "NerdzMessengerCondsAccepted";
-    private static final String sPrefsFile = "NerdzMessengerPrefs";
     private static final String sDefaultImplementation = "DefaultImplementation";
     private static final String sGcmRegId = "NerdzMessengerRegId";
+    private static final String sQuickResponse = "NerdzMessengerQuickResp";
 
-    static SharedPreferences sSharedPreferences = NerdzMessenger.context.getSharedPreferences(Prefs.sPrefsFile, Context.MODE_PRIVATE);
+    private static final String TAG = "NdzMsgPrefs";
+
+    static SharedPreferences sSharedPreferences = PreferenceManager.getDefaultSharedPreferences(NerdzMessenger.context);
 
     public static boolean accepted() {
         return Prefs.sSharedPreferences.getBoolean(Prefs.sConditions, false);
@@ -27,7 +31,13 @@ public class Prefs {
         return Prefs.sSharedPreferences.getString(Prefs.sDefaultImplementation, Implementation.FASTREVERSE);
     }
 
-    private String getGcmRegId() {
+    public static String getQuickResponse() {
+        String res = Prefs.sSharedPreferences.getString(Prefs.sQuickResponse, NerdzMessenger.context.getString(R.string.lol));
+        Log.d(TAG, res);
+        return res;
+    }
+
+    public static String getGcmRegId() {
         String regId = Prefs.sSharedPreferences.getString(Prefs.sGcmRegId, "");
         if (TextUtils.isEmpty(regId)) {
             return null;
@@ -56,6 +66,10 @@ public class Prefs {
 
     public static boolean setImplementationName(String name) {
         return Prefs.sSharedPreferences.edit().putString(Prefs.sDefaultImplementation, name).commit();
+    }
+
+    public static boolean setQuickResponse(String response) {
+        return Prefs.sSharedPreferences.edit().putString(Prefs.sQuickResponse, response).commit();
     }
 
     public static boolean saveAppVersion() {

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+    <string name="pref_header_general">General settings</string>
+    <string name="pref_quick_response">Change quick reply</string>
+    <string name="pref_quick_summary">Set a different quick reply message</string>
+    <string name="delete_account_dialog">Do you want to logout?</string>
+</resources>

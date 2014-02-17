@@ -30,7 +30,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.PowerManager;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.content.LocalBroadcastManager;
@@ -213,10 +212,6 @@ public class GcmIntentService extends IntentService {
             return;
         }
 
-        PowerManager.WakeLock wL = ((PowerManager) getSystemService(POWER_SERVICE)).newWakeLock(PowerManager.FULL_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP, "notifyWl");
-
-        wL.acquire();
-
         message = GcmIntentService.ellipsize(message, 60);
 
         String ticker = from + ": " + message;
@@ -278,8 +273,6 @@ public class GcmIntentService extends IntentService {
         }
 
         this.mNotificationManager.notify(MSG_ID, builder.build());
-
-        wL.release();
 
     }
 

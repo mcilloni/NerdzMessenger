@@ -16,10 +16,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Color;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.ActionBarActivity;
 import android.text.Html;
 import android.util.Log;
 import android.util.Pair;
@@ -77,7 +75,7 @@ public class ConversationsListActivity extends NerdzMessengerActivity {
 
         super.onCreate(savedInstanceState);
 
-        this.supportRequestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+        this.requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 
         this.setContentView(R.layout.layout_conversations_list);
 
@@ -140,30 +138,6 @@ public class ConversationsListActivity extends NerdzMessengerActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
 
         switch (item.getItemId()) {
-            case R.id.clist_delete_account: {
-                AccountManager am = AccountManager.get(this);
-                Account account = am.getAccountsByType(this.getString(R.string.account_type))[0];
-                am.removeAccount(account, new AccountManagerCallback<Boolean>() {
-
-                    @Override
-                    public void run(AccountManagerFuture<Boolean> future) {
-
-                        while (true) {
-                            if (future.isDone()) {
-                                break;
-                            }
-                        }
-
-                        ConversationsListActivity.this.shortToast(ConversationsListActivity.this.getString(R.string.account_deleted));
-
-                        Intent intent = new Intent(ConversationsListActivity.this, SplashScreenActivity.class);
-                        ConversationsListActivity.this.startActivity(intent);
-                        ConversationsListActivity.this.finish();
-
-                    }
-                }, null);
-                return true;
-            }
             case R.id.clist_refresh_button: {
                 this.fetchConversations();
                 return true;
@@ -171,6 +145,11 @@ public class ConversationsListActivity extends NerdzMessengerActivity {
             case R.id.clist_new_conversation: {
                 Intent intent = new Intent(ConversationsListActivity.this, NewMessageActivity.class);
                 ConversationsListActivity.this.startActivityForResult(intent, Keys.MESSAGE);
+                return true;
+            }
+            case R.id.clist_launch_settings: {
+                Intent intent = new Intent(ConversationsListActivity.this, SettingsActivity.class);
+                ConversationsListActivity.this.startActivity(intent);
                 return true;
             }
             default: {
@@ -260,7 +239,7 @@ public class ConversationsListActivity extends NerdzMessengerActivity {
      */
     @SuppressLint("Override")
     private void showProgress(final boolean show) {
-        this.setSupportProgressBarIndeterminateVisibility(show);
+        this.setProgressBarIndeterminateVisibility(show);
 
         boolean noConvShow = !show && this.mConversations.size() == 0;
         this.mNoConversationsMsgView.setVisibility(noConvShow ? View.VISIBLE : View.INVISIBLE);
@@ -393,7 +372,7 @@ public class ConversationsListActivity extends NerdzMessengerActivity {
     private class ConversationsListAdapter extends ArrayAdapter<Pair<Conversation, MessageContainer>> {
 
         private List<Pair<Conversation, MessageContainer>> mConversations;
-        private ActionBarActivity mActivity;
+        private Activity mActivity;
 
         public ConversationsListAdapter(List<Pair<Conversation, MessageContainer>> conversations) {
             super(ConversationsListActivity.this, R.layout.conversation_list_element, conversations);
